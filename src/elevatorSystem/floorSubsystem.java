@@ -16,19 +16,20 @@ import java.util.concurrent.TimeUnit;
  * @author Thomas
  *
  */
-public class floorSubsystem {
+class floorSubsystem extends Thread{
 
 	/**
 	 * @param args
 	 */
 	static HashMap<Integer, List<String>> table = new HashMap<Integer, List<String>>();
-			
-	public floorSubsystem() {
-		
+	public static parentSystem parent;
+	
+	public floorSubsystem(parentSystem parent) {
+		this.parent = parent;
 	}
 	
-	public static void main(String[] args) {		
-		
+	public void run() {		
+		//read tablefile.txt and save the values in a hashmap
 	    try {
 	        File file = new File("resources/tablefile.txt");
 	        Scanner myReader = new Scanner(file); 
@@ -48,9 +49,10 @@ public class floorSubsystem {
 				System.out.println("An error occurred.");
 				e.printStackTrace();
 	      } 
-	      
-	      System.out.print(table);
 
+	      parent.safePrint("floor sends: " + table.toString());
+	      parent.put(table);
+	      
 	}
 
 }
