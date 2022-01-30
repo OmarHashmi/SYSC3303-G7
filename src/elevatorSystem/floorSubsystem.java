@@ -1,13 +1,11 @@
 package elevatorSystem;
 
-import java.util.Scanner;
 import java.io.File; 
 import java.io.FileNotFoundException; 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.concurrent.TimeUnit;
@@ -22,10 +20,10 @@ class floorSubsystem extends Thread{
 	 * @param args
 	 */
 	static HashMap<Integer, List<String>> table = new HashMap<Integer, List<String>>();
-	public static parentSystem parent;
+	public static parentSystem boxToScheduler;
 	
-	public floorSubsystem(parentSystem parent) {
-		this.parent = parent;
+	public floorSubsystem(parentSystem boxToScheduler) {
+		this.boxToScheduler = boxToScheduler;
 	}
 	
 	public void run() {		
@@ -50,8 +48,10 @@ class floorSubsystem extends Thread{
 				e.printStackTrace();
 	      } 
 
-	      parent.safePrint("floor sends: " + table.toString());
-	      parent.put(table);
+    	boxToScheduler.safePrint("floor sends: " + table.toString());
+	    boxToScheduler.put(table);
+	    
+
 	      
 	}
 

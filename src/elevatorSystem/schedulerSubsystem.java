@@ -23,18 +23,22 @@ public class schedulerSubsystem extends Thread{
 	/**
 	 * @param args
 	 */
-	public static parentSystem parent;
+	public static parentSystem boxToFloor;
+	public static parentSystem boxToElevator;
 	static HashMap<Integer, List<String>> table = new HashMap<Integer, List<String>>();
 	
-	public schedulerSubsystem(parentSystem parent) {
-		this.parent = parent;
+	public schedulerSubsystem(parentSystem boxToFloor, parentSystem boxToElevator) {
+		this.boxToFloor = boxToFloor;
+		this.boxToElevator = boxToElevator;
+
 	}
 	
 	public void run(){
 		// TODO Auto-generated method stub
 		while(true) {
-			table = (HashMap<Integer, List<String>>) parent.get();
-			parent.safePrint("scheduler received: " + table.toString());
+			table = (HashMap<Integer, List<String>>) boxToFloor.get();
+			boxToFloor.safePrint("scheduler received: " + table.toString());
+
 		}
 
 	}

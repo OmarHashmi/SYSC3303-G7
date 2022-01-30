@@ -19,10 +19,12 @@ public class parentSystem {
     public static Object x = null;
     
 	public static void main(String[] args) {
-		parentSystem parent = new parentSystem();
-        Thread floor = new floorSubsystem(parent);	       
-        Thread scheduler = new schedulerSubsystem(parent);      
-        Thread elevator = new elevatorSubsystem(parent);
+		parentSystem floor_scheduler = new parentSystem();
+		parentSystem elevator_scheduler = new parentSystem();
+
+        Thread floor = new floorSubsystem(floor_scheduler);	       
+        Thread scheduler = new schedulerSubsystem(floor_scheduler, elevator_scheduler);     
+        Thread elevator = new elevatorSubsystem(elevator_scheduler);
         		
         floor.start(); 
         scheduler.start(); 
