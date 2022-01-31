@@ -1,0 +1,121 @@
+package project;
+
+import java.util.Random;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.concurrent.TimeUnit;
+/**
+ * @author Thomas
+ *
+ */
+public class ParentSubsystem {
+
+	/**
+	 * @param args
+	 */
+    private Object contents = null; // contents
+    private boolean empty = true; // empty?
+    public static Object x = null;
+    
+	public static void main(String[] args) {
+		ParentSubsystem floor_scheduler = new ParentSubsystem();
+		ParentSubsystem elevator_scheduler = new ParentSubsystem();
+
+        Thread floor = new Floor(floor_scheduler);	       
+        Thread scheduler = new Scheduler(floor_scheduler, elevator_scheduler);     
+        Thread elevator = new Elevator(elevator_scheduler);
+        		
+        floor.start(); 
+        scheduler.start(); 
+        elevator.start();
+
+
+	}
+	
+	/* 
+	 * put() takes item and puts item in box
+	 * 	
+	 * @param
+	 * Object ingredients: takes the ingredients array
+	 * Box box: a reference to the shared box class
+	 * 
+	 * @return 
+	 * void
+	 * 
+	 */
+	public synchronized void put(Object item) {	
+		
+		while(!empty) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
+		}				
+        contents = item;
+        empty = false;
+        notifyAll();
+				
+	}
+	
+	/*
+	 * get() returns the item within the box
+	 * 
+	 * @param
+	 * 
+	 * @return  
+	 * the object gotten from the box
+	 */
+	public synchronized Object get() {
+		while(empty) {
+			
+			try {
+				wait();
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		
+        Object item = contents;
+        contents = null;
+        empty = true;
+        notifyAll();
+        return item;			
+	}
+	/*
+	 * check() checks what item is in the box without emptying the box
+	 * 
+	 */
+    public synchronized Object check() {
+        while (empty) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                return null;
+            }
+        }
+        Object item = contents;
+        notifyAll();
+        return item;
+    }
+	
+	/*
+	 * safePrint() receives strings and prints them Thread safely 
+	 * 
+	 * @param
+	 * String s: The string to be printed
+	 * 
+	 * @return
+	 * void
+	 */
+	public void safePrint(String s) {
+		synchronized (System.out) {
+			System.out.println(s);
+		}
+		
+	}
+
+}
