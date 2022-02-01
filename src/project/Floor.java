@@ -1,25 +1,28 @@
 package project;
 
 import java.io.File; 
-import java.io.FileNotFoundException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
  * Floor Subsystem Class
  * 
- * @author Thomas
+ * @author Thomas Poetting
+ * @author Sam Al Zoubi
  */
 class Floor extends Thread{
 	private Box boxToScheduler;
-	private ArrayList<ElevatorEvent> elevatorEvents = new ArrayList<ElevatorEvent>(); 
+	private Scheduler scheduler;
+	private ArrayList<ElevatorEvent> elevatorEvents = new ArrayList<ElevatorEvent>();
 	
 	/**
 	 * Constructor for Floor
 	 * 
 	 * @param boxToScheduler The communication channel to scheduler
 	 */
-	public Floor(Box boxToScheduler) {
+	public Floor(Box boxToScheduler, Scheduler scheduler) {
 		this.boxToScheduler = boxToScheduler;
+		this.scheduler = scheduler;
 	}
 	
 	/**
@@ -27,23 +30,44 @@ class Floor extends Thread{
 	 * Imports data file and sends to scheduler
 	 */
 	public void run() {		
-		try {
-	        File file = new File("resources/elevator_events.txt");
-	        Scanner myReader = new Scanner(file); 
-	        
-	        while(myReader.hasNextLine()) {
-	        	String data = myReader.nextLine();
-        		ElevatorEvent event = new ElevatorEvent(data);
-        		
-	        	elevatorEvents.add(event);
-	        }
-	        	myReader.close();
-	        
-	      } catch (FileNotFoundException e) {
-				System.out.println("An error occurred.");
-				e.printStackTrace();
-	      }
+		this.readFile("resources/elevator_events.txt");
+		
 	    Main.safePrint("Floor Sent:\t" + elevatorEvents.toString());
     	boxToScheduler.put(elevatorEvents);
+    	
+//    	while (true) {
+//			while (!elevatorEvents.isEmpty()) {
+//				scheduler.callForElevator(elevatorEvents.remove(elevatorEvents.size()-1));
+//			}
+//		}
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @param path
+	 */
+	public void readFile(String path) {
+		try {
+			File file = new File(path);
+			Scanner myReader = new Scanner(file); 
+			    
+			while(myReader.hasNextLine()) {
+				String[] data = myReader.nextLine().split(" ");
+				
+				Date date		= new SimpleDateFormat("HH:mm:ss.SSS").parse(data[0]);
+				int dir			= (data[2]=="Up")? 1 : -1;
+				int startFloor	= Integer.parseInt(data[1]);
+				int endFloor	= Integer.parseInt(data[3]);
+				
+				ElevatorEvent event = new ElevatorEvent(date,dir,startFloor,endFloor);
+						
+				elevatorEvents.add(event);
+			}
+			myReader.close();	    
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

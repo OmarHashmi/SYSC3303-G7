@@ -11,17 +11,21 @@ public class Main {
 		Box floorScheduler = new Box();
 		Box elevatorScheduler = new Box();
 
-        Thread floor = new Floor(floorScheduler);	       
-        Thread scheduler = new Scheduler(floorScheduler, elevatorScheduler);     
-        Thread elevator = new Elevator(elevatorScheduler);
+		Scheduler scheduler = new Scheduler(floorScheduler, elevatorScheduler);
+		Floor floor = new Floor(floorScheduler, scheduler);
+		Elevator elevator = new Elevator(elevatorScheduler, scheduler);
+		
+		Thread schedulerThread = scheduler;
+        Thread floorThread = floor;	       
+        Thread elevatorThread = elevator;
         		
-        floor.start(); 
-        scheduler.start(); 
-        elevator.start();
+        floorThread.start(); 
+        schedulerThread.start(); 
+        elevatorThread.start();
         
         // Temporary to terminate program
         try {
-			Thread.sleep(2000);
+			Thread.sleep(20000);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
