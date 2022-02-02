@@ -1,43 +1,36 @@
 package project;
 
-import java.io.File; 
-import java.io.FileNotFoundException; 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
 import java.util.*;
-import java.util.List;
-import java.util.function.Supplier;
-import java.util.concurrent.TimeUnit;
 
 /**
+ * Scheduler Subsystem Class
+ * 
  * @author Thomas
- *
  */
-@SuppressWarnings("unused")
 public class Scheduler extends Thread{
 
-	/**
-	 * @param args
-	 */
-	public static ParentSubsystem boxToFloor;
-	public static ParentSubsystem boxToElevator;
-	static HashMap<Integer, List<String>> table = new HashMap<Integer, List<String>>();
+	private Box boxToFloor;
+	private Box boxToElevator;
+	private ArrayList<ElevatorEvent> elevatorEvents = new ArrayList<ElevatorEvent>();
 	
-	public Scheduler(ParentSubsystem boxToFloor, ParentSubsystem boxToElevator) {
+	/**
+	 * Constructor for the Scheduler
+	 * 
+	 * @param boxToFloor	Communication channel to the floor
+	 * @param boxToElevator Communication channel to the elevator
+	 */
+	public Scheduler(Box boxToFloor, Box boxToElevator) {
 		this.boxToFloor = boxToFloor;
 		this.boxToElevator = boxToElevator;
-
 	}
-	
+
+	/**
+	 * Thread loop for Elevator
+	 */
 	public void run(){
-		// TODO Auto-generated method stub
 		while(true) {
-			table = (HashMap<Integer, List<String>>) boxToFloor.get();
-			boxToFloor.safePrint("scheduler received: " + table.toString());
-
+			elevatorEvents = boxToFloor.pop();
+			Main.safePrint("Scheduler Got:\t" + Arrays.deepToString(elevatorEvents.toArray()));
 		}
-
 	}
-
 }
