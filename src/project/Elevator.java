@@ -1,24 +1,27 @@
 package project;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
+/**
+ * Elevator Subsystem Class
+ * 
+ * @author Omar
+ */
 public class Elevator extends Thread {
 
-	public static ParentSubsystem boxToScheduler;
-	static HashMap<Integer, List<String>> table = new HashMap<Integer, List<String>>();
+	private Box boxToScheduler;
 
-	public Elevator(ParentSubsystem boxToScheduler) {
+	/**
+	 * Constructor for Elevator
+	 * 
+	 * @param boxToScheduler The communication channel to scheduler
+	 */
+	public Elevator(Box boxToScheduler) {
 		this.boxToScheduler = boxToScheduler;
 	}
 	
+	/**
+	 * Thread loop for Elevator
+	 */
 	public void run() {
-		// TODO Auto-generated method stub
-		while(true) {
-			
-		}
-
+		
 	}
-
 }

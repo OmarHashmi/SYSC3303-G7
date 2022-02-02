@@ -1,58 +1,49 @@
 package project;
 
 import java.io.File; 
-import java.io.FileNotFoundException; 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.io.FileNotFoundException;
 import java.util.*;
-import java.util.List;
-import java.util.function.Supplier;
-import java.util.concurrent.TimeUnit;
 
 /**
+ * Floor Subsystem Class
+ * 
  * @author Thomas
- *
  */
 class Floor extends Thread{
-
-	/**
-	 * @param args
-	 */
-	static HashMap<Integer, List<String>> table = new HashMap<Integer, List<String>>();
-	public static ParentSubsystem boxToScheduler;
+	private Box boxToScheduler;
+	private ArrayList<ElevatorEvent> elevatorEvents = new ArrayList<ElevatorEvent>(); 
 	
-	public Floor(ParentSubsystem boxToScheduler) {
+	/**
+	 * Constructor for Floor
+	 * 
+	 * @param boxToScheduler The communication channel to scheduler
+	 */
+	public Floor(Box boxToScheduler) {
 		this.boxToScheduler = boxToScheduler;
 	}
 	
+	/**
+	 * Thread loop for floor
+	 * Imports data file and sends to scheduler
+	 */
 	public void run() {		
-		//read tablefile.txt and save the values in a hashmap
-	    try {
+		try {
 	        File file = new File("resources/elevator_events.txt");
 	        Scanner myReader = new Scanner(file); 
 	        
-	        for(int count = 0; myReader.hasNextLine(); count++) {
-	        	List<String> list = new ArrayList<String>();
-        		String data = myReader.nextLine();
-        		String[] array = data.split(" ");
+	        while(myReader.hasNextLine()) {
+	        	String data = myReader.nextLine();
+        		ElevatorEvent event = new ElevatorEvent(data);
         		
-        		list.addAll(Arrays.asList(array));
-	        	table.put(count, list);
-
+	        	elevatorEvents.add(event);
 	        }
 	        	myReader.close();
 	        
 	      } catch (FileNotFoundException e) {
 				System.out.println("An error occurred.");
 				e.printStackTrace();
-	      } 
-
-    	boxToScheduler.safePrint("floor sends: " + table.toString());
-	    boxToScheduler.put(table);
-	    
-
-	      
+	      }
+	    Main.safePrint("Floor Sent:\t" + elevatorEvents.toString());
+    	boxToScheduler.put(elevatorEvents);
 	}
-
 }
