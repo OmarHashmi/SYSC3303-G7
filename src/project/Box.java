@@ -68,4 +68,8 @@ public class Box {
         notifyAll();
         return contents;
     }
+    
+    public boolean getEmpty() {
+    	return this.empty;
+    }
 }
