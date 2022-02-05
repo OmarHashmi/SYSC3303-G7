@@ -22,14 +22,6 @@ public class Main {
         floorThread.start(); 
         schedulerThread.start(); 
         elevatorThread.start();
-        
-        // Temporary to terminate program
-        try {
-			Thread.sleep(20000);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-        System.exit(0);
 	}
 	
 	/**

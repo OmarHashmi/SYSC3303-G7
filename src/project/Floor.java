@@ -32,8 +32,18 @@ class Floor extends Thread{
 	public void run() {		
 		this.readFile("resources/elevator_events.txt");
 		
-	    Main.safePrint("Floor Sent:\t" + elevatorEvents.toString());
-    	boxToScheduler.put(elevatorEvents);
+		synchronized(boxToScheduler) {
+    		Main.safePrint("Floor Sent:\t" + elevatorEvents.toString());
+        	boxToScheduler.put(elevatorEvents);
+        	boxToScheduler.notifyAll();
+        	
+        	try {
+				boxToScheduler.wait();
+				System.out.println("Floor Received Passengers");
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
     	
 //    	while (true) {
 //			while (!elevatorEvents.isEmpty()) {
@@ -64,7 +74,7 @@ class Floor extends Thread{
 						
 				elevatorEvents.add(event);
 			}
-			myReader.close();	    
+			myReader.close();
 		}
 		catch (Exception e) {
 			e.printStackTrace();
