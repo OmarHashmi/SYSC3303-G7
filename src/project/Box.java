@@ -21,13 +21,11 @@ public class Box {
 			try {
 				wait();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}	
 		}				
         this.contents = item;
         this.empty = false;
-        notifyAll();
 	}
 	
 	/**
@@ -40,7 +38,6 @@ public class Box {
 			try {
 				wait();
 			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		}
@@ -48,8 +45,7 @@ public class Box {
 		ArrayList<ElevatorEvent> item = contents;
         contents = null;
         empty = true;
-        notifyAll();
-        return item;			
+        return item;
 	}
 	
 	/**
@@ -65,11 +61,22 @@ public class Box {
                 return null;
             }
         }
-        notifyAll();
         return contents;
     }
     
     public boolean getEmpty() {
     	return this.empty;
+    }
+
+    public synchronized void addEvent(ElevatorEvent event) {
+    	this.contents.add(event);
+    	empty=false;
+    }
+    
+    public synchronized ElevatorEvent removeTop() {
+    	if(empty) {
+    		return null;
+    	}
+    	return contents.remove(contents.size()-1);
     }
 }

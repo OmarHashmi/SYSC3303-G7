@@ -29,8 +29,38 @@ public class Scheduler extends Thread{
 	 */
 	public void run(){
 		while(true) {
-			elevatorEvents = boxToFloor.pop();
+			synchronized(boxToFloor) {
+				try {
+					boxToFloor.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+				elevatorEvents = boxToFloor.pop();				
+			}
+			
 			Main.safePrint("Scheduler Got:\t" + Arrays.deepToString(elevatorEvents.toArray()));
+			
+			ElevatorEvent event;
+			synchronized(boxToElevator) {
+				event = elevatorEvents.get(elevatorEvents.size()-1);
+				ArrayList<ElevatorEvent> list=new ArrayList<ElevatorEvent>();
+				list.add(event);
+				
+				Main.safePrint("Scheduler Sent:\t" + event.toString());
+				boxToElevator.put(list);
+				boxToElevator.notifyAll();
+				
+				try {
+					boxToElevator.wait();
+					System.out.println("Sheduler Notified of Passenger Arrival");
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			synchronized(boxToFloor) {
+				boxToFloor.notifyAll();
+			}
 		}
 	}
 	
