@@ -1,0 +1,28 @@
+Tom Pieroni: 
+UML Class Diagram
+UML Sequence Diagram
+boxTest.java (Junit test)
+floorTest.java (Junit test)
+Added test instructions to Readme
+
+Omar Hashmi:
+Created ElevatorEvent class
+Updated file reading to parse it into ElevatorEvent format
+Added install instructions to readme
+Setup communication between subsystems
+
+Sam Z:
+Created the skeleton for the Elevator run method and move method
+Created the callForElevator, processUserCall and completeCall methods for Scheduler
+
+Thomas Poetting:
+initialized Main.java (originally parentSubsystem)
+safePrint()
+inititalized Box.java
+put()
+pop() (originally get)
+get() (originally check)
+initialized Floor.java
+first draft of readFile()
+initialized Elevator.java
+initialized Scheduler.java
