@@ -6,6 +6,7 @@ import java.util.*;
  * Scheduler Subsystem Class
  * 
  * @author Thomas
+ * @author Sam Al Zoubi
  */
 public class Scheduler extends Thread{
 
