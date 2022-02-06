@@ -48,34 +48,6 @@ public class Elevator extends Thread {
 				Main.safePrint("Elevator Got:\t" + event.toString());
 			}
 			
-			// Go to the start floor
-			int diff = event.getStartFloor()-currentFloor;
-			if (diff > 0) {
-				move(currentFloor, -1, event.getStartFloor());
-			} else if (diff < 0) {
-				move(currentFloor, 1, event.getStartFloor());
-			} else {
-				move(currentFloor, 0, event.getStartFloor());
-			}
-			
-			System.out.println("Elevator Picked Up Passengers");
-			
-			// Go to the end floor
-			diff = event.getEndFloor()-currentFloor;
-			if (diff > 0) {
-				move(currentFloor, -1, event.getEndFloor());
-			} else if (diff < 0) {
-				move(currentFloor, 1, event.getEndFloor());
-			} else {
-				move(currentFloor, 0, event.getEndFloor());
-			}
-
-			System.out.println("Elevator Dropped Off Passengers");
-			
-			// Mark call as complete
-			Date completionTime = new Date();
-			scheduler.completeCall(completionTime, currentFloor, true);
-			
 			synchronized(boxToScheduler) {
 				boxToScheduler.notifyAll();
 			}
