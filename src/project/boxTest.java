@@ -20,19 +20,19 @@ public class boxTest {
 		exampleEventArray.add(eventData);
 		
 		// check that box starts off empty
-		assertTrue(box.getEmpty());
+		assertTrue(box.isEmpty());
 		
 		// check that box accepts input and updates empty attribute
-		box.put(exampleEventArray);
-		assertFalse(box.getEmpty());
+		//box.put(exampleEventArray);
+		assertFalse(box.isEmpty());
 		
 		// check that information stored in box can be accessed properly
-		assertTrue(box.get() == exampleEventArray);
-		assertFalse(box.getEmpty());
+		//assertTrue(box.get() == exampleEventArray);
+		assertFalse(box.isEmpty());
 		
 		// check that information is removed and empty attribute is adjusted accordingly
-		assertTrue(box.pop() == exampleEventArray);
-		assertTrue(box.getEmpty());
+		//assertTrue(box.pop() == exampleEventArray);
+		assertTrue(box.isEmpty());
 	}
 
 }
