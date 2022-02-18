@@ -11,17 +11,17 @@ import java.util.*;
  * @author Sam Al Zoubi
  */
 class Floor extends Thread{
-	private Box boxToScheduler;
+	private Box schedulerBox;
 	private Scheduler scheduler;
 	private ArrayList<ElevatorEvent> elevatorEvents = new ArrayList<ElevatorEvent>();
 	
 	/**
 	 * Constructor for Floor
 	 * 
-	 * @param boxToScheduler The communication channel to scheduler
+	 * @param schedulerBox The communication channel to scheduler
 	 */
-	public Floor(Box boxToScheduler, Scheduler scheduler) {
-		this.boxToScheduler = boxToScheduler;
+	public Floor(Box schedulerBox, Scheduler scheduler) {
+		this.schedulerBox = schedulerBox;
 		this.scheduler = scheduler;
 	}
 	
@@ -32,13 +32,17 @@ class Floor extends Thread{
 	public void run() {		
 		this.readFile("resources/elevator_events.txt");
 		
-		synchronized(boxToScheduler) {
+		synchronized(schedulerBox) {
     		Main.safePrint("Floor Sent:\t" + elevatorEvents.toString());
-        	boxToScheduler.put(elevatorEvents);
-        	boxToScheduler.notifyAll();
+    		
+    		for(ElevatorEvent e: elevatorEvents) {
+    			schedulerBox.add(e);
+    		}
+    		
+        	schedulerBox.notifyAll();
         	
         	try {
-				boxToScheduler.wait();
+				schedulerBox.wait();
 				System.out.println("Floor Received Passengers");
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -66,7 +70,7 @@ class Floor extends Thread{
 				String[] data = myReader.nextLine().split(" ");
 				
 				Date date		= new SimpleDateFormat("HH:mm:ss.SSS").parse(data[0]);
-				int dir			= (data[2]=="Up")? 1 : -1;
+				int dir			= (data[2].equals("Up"))? 1 : -1;
 				int startFloor	= Integer.parseInt(data[1]);
 				int endFloor	= Integer.parseInt(data[3]);
 				

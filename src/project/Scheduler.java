@@ -9,19 +9,19 @@ import java.util.*;
  */
 public class Scheduler extends Thread{
 
-	private Box boxToFloor;
-	private Box boxToElevator;
+	private Box floorBox;
+	private Box elevatorBox;
 	private ArrayList<ElevatorEvent> elevatorEvents = new ArrayList<ElevatorEvent>();
 	
 	/**
 	 * Constructor for the Scheduler
 	 * 
-	 * @param boxToFloor	Communication channel to the floor
-	 * @param boxToElevator Communication channel to the elevator
+	 * @param floorBox	Communication channel to the floor
+	 * @param elevatorBox Communication channel to the elevator
 	 */
-	public Scheduler(Box boxToFloor, Box boxToElevator) {
-		this.boxToFloor = boxToFloor;
-		this.boxToElevator = boxToElevator;
+	public Scheduler(Box floorBox, Box elevatorBox) {
+		this.floorBox = floorBox;
+		this.elevatorBox = elevatorBox;
 	}
 
 	/**
@@ -29,37 +29,37 @@ public class Scheduler extends Thread{
 	 */
 	public void run(){
 		while(true) {
-			synchronized(boxToFloor) {
+			synchronized(floorBox) {
 				try {
-					boxToFloor.wait();
+					floorBox.wait();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 				
-				elevatorEvents = boxToFloor.pop();				
+				while(!floorBox.isEmpty()) {
+					elevatorEvents.add(floorBox.remove());
+				}
 			}
 			
-			Main.safePrint("Scheduler Got:\t" + Arrays.deepToString(elevatorEvents.toArray()));
+			Main.safePrint("Scheduler Got:\t" + elevatorEvents);
 			
 			ElevatorEvent event;
-			synchronized(boxToElevator) {
+			synchronized(elevatorBox) {
 				event = elevatorEvents.get(elevatorEvents.size()-1);
-				ArrayList<ElevatorEvent> list=new ArrayList<ElevatorEvent>();
-				list.add(event);
 				
 				Main.safePrint("Scheduler Sent:\t" + event.toString());
-				boxToElevator.put(list);
-				boxToElevator.notifyAll();
+				elevatorBox.add(event);
+				elevatorBox.notifyAll();
 				
 				try {
-					boxToElevator.wait();
+					elevatorBox.wait();
 					System.out.println("Sheduler Notified of Passenger Arrival");
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
-			synchronized(boxToFloor) {
-				boxToFloor.notifyAll();
+			synchronized(floorBox) {
+				floorBox.notifyAll();
 			}
 		}
 	}

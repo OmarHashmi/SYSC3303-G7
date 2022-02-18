@@ -8,75 +8,41 @@ import java.util.ArrayList;
  * @author Omar
  */
 public class Box {
-	private ArrayList<ElevatorEvent> contents = null;
-    private boolean empty = true;
+	private ArrayList<ElevatorEvent> data;
 	
-    /**
-     * Adds item to the box
-     * 
-     * @param item The item to be added
-     */
-	public synchronized void put(ArrayList<ElevatorEvent> item) {		
-		while(!empty) {
-			try {
-				wait();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}	
-		}				
-        this.contents = item;
-        this.empty = false;
+	public Box() {
+		this.data = new ArrayList<ElevatorEvent>();
 	}
 	
-	/**
-	 * Removes the item from the box, then returns it
-	 * 
-	 * @return The item
-	 */
-	public synchronized ArrayList<ElevatorEvent> pop() {
-		while(this.empty) {		
-			try {
-				wait();
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-			}
-		}
-		
-		ArrayList<ElevatorEvent> item = contents;
-        contents = null;
-        empty = true;
-        return item;
-	}
-	
-	/**
-	 * Returns the item in the box, without removing it
-	 * 
-	 * @return The item
-	 */
-    public synchronized ArrayList<ElevatorEvent> get() {
-        while (empty) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                return null;
-            }
-        }
-        return contents;
-    }
-    
-    public boolean getEmpty() {
-    	return this.empty;
+    public boolean isEmpty() {
+    	return data.isEmpty();
     }
 
-    public synchronized void addEvent(ElevatorEvent event) {
-    	this.contents.add(event);
-    	empty=false;
+    public void add(ElevatorEvent event) {
+    	this.data.add(event);
     }
     
-    public synchronized ElevatorEvent removeTop() {
-    	if(empty) {
+    public ElevatorEvent get(int index) {
+    	if(index<0 || index>=data.size() || data.isEmpty()) {
     		return null;
     	}
-    	return contents.remove(contents.size()-1);
+    	return data.get(index);
+    }
+    public ElevatorEvent get() {
+    	return this.get(data.size()-1);
+    }
+    
+    public ElevatorEvent remove(int index) {
+    	if(index<0 || index>=data.size() || data.isEmpty()) {
+    		return null;
+    	}
+    	return data.remove(index);
+    }
+    public ElevatorEvent remove() {
+    	return this.remove(data.size()-1);
+    }
+    
+    public String toString() {
+    	return data.toString();
     }
 }
