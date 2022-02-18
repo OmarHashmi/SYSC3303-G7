@@ -12,6 +12,7 @@ public class Scheduler extends Thread{
 	private Box floorBox;
 	private Box elevatorBox;
 	private ArrayList<ElevatorEvent> elevatorEvents = new ArrayList<ElevatorEvent>();
+	private ArrayList<ElevatorEvent> sendEvents = new ArrayList<ElevatorEvent>();
 	
 	/**
 	 * Constructor for the Scheduler
@@ -37,32 +38,100 @@ public class Scheduler extends Thread{
 				}
 				
 				while(!floorBox.isEmpty()) {
-					elevatorEvents.add(floorBox.remove());
+					elevatorEvents.add(floorBox.remove(0));
 				}
 			}
 			
 			Main.safePrint("Scheduler Got:\t" + elevatorEvents);
 			
-			ElevatorEvent event;
-			synchronized(elevatorBox) {
-				event = elevatorEvents.get(elevatorEvents.size()-1);
-				
-				Main.safePrint("Scheduler Sent:\t" + event.toString());
-				elevatorBox.add(event);
-				elevatorBox.notifyAll();
-				
-				try {
-					elevatorBox.wait();
-					System.out.println("Sheduler Notified of Passenger Arrival");
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
+			
+			organizeEvents(elevatorEvents);
+
+			
 			synchronized(floorBox) {
 				floorBox.notifyAll();
 			}
 		}
 	}
+	
+	/** 
+	 * For elevator events in elevatorEvents from Floor.java check if events are going in the same direction 
+	 * and if the end floor is the same or lower/higher (depending on the direction of the previous event) of 
+	 * the previous event. When the current event is not in the same direction as the previous events send the collected
+	 * events. Then check whether the next event is in the same direction as the current event,
+	 * if not then send the current event. If next event is in the same direction hen check if the next event 
+	 * is not in the same way as the current event, if not then send the current event. 
+	 * Then send remaining collected events.
+	 * 
+	 * @param array list of elevator events taken from floorBox
+	 */
+	public void organizeEvents(ArrayList<ElevatorEvent> events) {
+		ElevatorEvent previousEvent = elevatorEvents.get(0);
+		int index = 0;
+		boolean send  = false;
+		
+		for(ElevatorEvent e: elevatorEvents) {										
+
+			//System.out.println("previous: "+ previousEvent.toString() + " Current: "+ e.toString());
+			if(previousEvent.getDir() == e.getDir()) {
+				//System.out.println("parent if");
+				if(e.getDir()==1 && (previousEvent.getEndFloor() >= e.getEndFloor())) {
+					sendEvents.add(e);
+					//System.out.println("first if");
+				}
+				else if(e.getDir()==-1 && (previousEvent.getEndFloor() <= e.getEndFloor())) {
+					//System.out.println("second if");
+
+					sendEvents.add(e);
+				}	
+				
+				previousEvent = e;
+			}				
+			else {					
+				sendEventsToElevator(sendEvents);
+				sendEvents = new ArrayList<ElevatorEvent>();
+				sendEvents.add(e);
+				
+				if(index < elevatorEvents.size()-1) {
+					previousEvent = elevatorEvents.get(index+1);
+				}
+				
+				if(e.getDir() != previousEvent.getDir()) {
+					sendEventsToElevator(sendEvents);
+					sendEvents = new ArrayList<ElevatorEvent>();
+				}
+				else if((e.getDir() == 1) && (e.getEndFloor() > previousEvent.getEndFloor())) {
+					sendEventsToElevator(sendEvents);
+				}
+				else if((e.getDir() == -1) && (e.getEndFloor() < previousEvent.getEndFloor())) {
+					sendEventsToElevator(sendEvents);
+				}
+
+			}
+			index++;
+		}
+		
+		sendEventsToElevator(sendEvents);
+		
+	}
+	
+	public void sendEventsToElevator(ArrayList<ElevatorEvent> events) {
+		synchronized(elevatorBox) {
+			Main.safePrint("Scheduler Sent:\t" + events.toString());
+			/*
+			elevatorBox.add(events);
+			elevatorBox.notifyAll();
+			
+			try {
+				elevatorBox.wait();
+				System.out.println("Scheduler Notified of Passenger Arrival");
+			} catch (InterruptedException err) {
+				err.printStackTrace();
+			}
+			*/
+		}
+	}
+	
 	
 	/**
 	 * Places a request by added RequestData to requests.
