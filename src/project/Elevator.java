@@ -11,17 +11,17 @@ import java.util.Date;
  */
 public class Elevator extends Thread {
 
-	private Box boxToScheduler;
+	private Box schedulerBox;
 	private Scheduler scheduler;
 	private int currentFloor;
 
 	/**
 	 * Constructor for Elevator
 	 * 
-	 * @param boxToScheduler The communication channel to scheduler
+	 * @param schedulerBox The communication channel to scheduler
 	 */
-	public Elevator(Box boxToScheduler, Scheduler scheduler) {
-		this.boxToScheduler = boxToScheduler;
+	public Elevator(Box schedulerBox, Scheduler scheduler) {
+		this.schedulerBox = schedulerBox;
 		this.scheduler = scheduler;
 		this.currentFloor = 0;
 	}
@@ -36,20 +36,20 @@ public class Elevator extends Thread {
 			
 			ElevatorEvent event;
 			
-			synchronized(boxToScheduler) {
+			synchronized(schedulerBox) {
 				try {
-					boxToScheduler.wait();
+					schedulerBox.wait();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 				
-				event = boxToScheduler.removeTop();
+				event = schedulerBox.remove();
 				
 				Main.safePrint("Elevator Got:\t" + event.toString());
 			}
 			
-			synchronized(boxToScheduler) {
-				boxToScheduler.notifyAll();
+			synchronized(schedulerBox) {
+				schedulerBox.notifyAll();
 			}
 		}
 	}
