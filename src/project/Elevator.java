@@ -1,7 +1,9 @@
 package project;
 
-import java.util.Arrays;
-import java.util.Date;
+import java.util.*;
+//import java.util.Arrays;
+//import java.util.Date;
+import elevator.*;
 
 /**
  * Elevator Subsystem Class
@@ -10,10 +12,26 @@ import java.util.Date;
  * @author Sam Al Zoubi
  */
 public class Elevator extends Thread {
+	
+	enum State{
+		IDLE,
+		UP,
+		DOWN,
+		DOORCLOSING,
+		DOOROPENING
+	}
 
 	private Box schedulerBox;
 	private Scheduler scheduler;
 	private int currentFloor;
+	private State currentState;
+	
+	// Subsystem variables
+	private ArrivalSensor sensor;
+	//private ElevatorButton buttons[];
+	//private ElevatorLamp lamps[];
+	private ElevatorDoor door;
+	private Motor motor;
 
 	/**
 	 * Constructor for Elevator
@@ -33,20 +51,26 @@ public class Elevator extends Thread {
 	 */
 	public void run() {
 		while(true) {
+	
 			
-			ElevatorEvent event;
-			
-			synchronized(schedulerBox) {
-				try {
-					schedulerBox.wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				
-				event = schedulerBox.remove();
+			while(!schedulerBox.isEmpty()) {
+				ElevatorEvent event = schedulerBox.remove();
 				
 				Main.safePrint("Elevator Got:\t" + event.toString());
+				
+				if(door.checkDoorState().equals("OPEN")) {
+					currentState = State.DOORCLOSING;
+					door.closeDoors();
+				}
 			}
+							
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+			
 			
 			synchronized(schedulerBox) {
 				schedulerBox.notifyAll();
