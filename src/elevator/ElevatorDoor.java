@@ -1,4 +1,5 @@
 package elevator;
+import java.util.concurrent.TimeUnit;
 
 // @author Tom P
 public class ElevatorDoor {
@@ -24,8 +25,9 @@ public class ElevatorDoor {
 			System.out.println("Closing Elevator Doors.....");
 			
 			// Simulate elevator doors closing over the span of 3 seconds
+			
 			try {
-				Thread.sleep(3000);
+				TimeUnit.SECONDS.sleep(3);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -45,8 +47,9 @@ public class ElevatorDoor {
 			System.out.println("Opening Elevator Doors.....");
 			
 			// Simulate elevator doors opening over the span of 3 seconds
+			
 			try {
-				Thread.sleep(3000);
+				TimeUnit.SECONDS.sleep(3);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

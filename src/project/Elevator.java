@@ -100,7 +100,7 @@ public class Elevator extends Thread {
 					
 				case "CLOSEDOORS":
 					currentState = State.DOORSCLOSING;
-					door.openDoors();
+					door.closeDoors();
 					break;
 					
 				case "CONTINUE":

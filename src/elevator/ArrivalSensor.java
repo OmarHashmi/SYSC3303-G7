@@ -16,24 +16,24 @@ public class ArrivalSensor {
 		String elevatorState = elevator.getCurrentState();
 		if(elevatorState.equals("UP")) {
 			floorNumber++;
-			System.out.println("Elevator Arriving at Floor " + floorNumber);
+			Main.safePrint("Elevator Arriving at Floor " + floorNumber);
 			
 			//*******************************************
 			//		SEND FLOOR NUMBER TO SCHEDULER
 			//*******************************************
 			
-			elevator.getMessenger().setMessage(Integer.toString(floorNumber));
+			elevator.getMessenger().setFloor(Integer.toString(floorNumber));
 			
 		}
 		else if(elevatorState.equals("DOWN")) {
 			floorNumber--;
-			System.out.println("Elevator Arriving at Floor " + floorNumber);
+			Main.safePrint("Elevator Arriving at Floor " + floorNumber);
 			
 			//*******************************************
 			//		SEND FLOOR NUMBER TO SCHEDULER
 			//*******************************************
 			
-			elevator.getMessenger().setMessage(Integer.toString(floorNumber));
+			elevator.getMessenger().setFloor(Integer.toString(floorNumber));
 		}
 		
 		return floorNumber;

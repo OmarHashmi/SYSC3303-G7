@@ -9,10 +9,10 @@ public class Main {
     
 	public static void main(String[] args) {
 		Box floorScheduler = new Box();
-		Box elevatorScheduler = new Box();
+		//Box elevatorScheduler = new Box();
 		Message messenger = new Message();
 
-		Scheduler scheduler = new Scheduler(floorScheduler, elevatorScheduler);
+		Scheduler scheduler = new Scheduler(floorScheduler, messenger);
 		Floor floor = new Floor(floorScheduler, scheduler);
 		Elevator elevator = new Elevator(messenger, scheduler);
 		
