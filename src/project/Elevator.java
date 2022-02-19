@@ -1,7 +1,9 @@
 package project;
 
-import java.util.Arrays;
-import java.util.Date;
+import java.util.*;
+//import java.util.Arrays;
+//import java.util.Date;
+import elevator.*;
 
 /**
  * Elevator Subsystem Class
@@ -10,20 +12,48 @@ import java.util.Date;
  * @author Sam Al Zoubi
  */
 public class Elevator extends Thread {
+	
+	enum State{
+		IDLE,
+		UP,
+		DOWN,
+		DOORSCLOSING,
+		DOORSOPENING
+	}
 
-	private Box boxToScheduler;
+	//box to communicate with scheduler
+	private Message messenger;
 	private Scheduler scheduler;
 	private int currentFloor;
+	private State currentState;
+	
+	// Subsystem variables
+	private ArrivalSensor sensor;
+	private ArrayList<ElevatorButton> buttons;
+	private ArrayList<ElevatorLamp> lamps;
+	private ElevatorDoor door;
+	private Motor motor;
 
 	/**
 	 * Constructor for Elevator
 	 * 
-	 * @param boxToScheduler The communication channel to scheduler
+	 * @param schedulerBox The communication channel to scheduler
 	 */
-	public Elevator(Box boxToScheduler, Scheduler scheduler) {
-		this.boxToScheduler = boxToScheduler;
+	public Elevator(Message messenger, Scheduler scheduler) {
+		this.messenger = messenger;
 		this.scheduler = scheduler;
+		
+		this.currentState = State.IDLE;
 		this.currentFloor = 0;
+		
+		this.sensor = new ArrivalSensor(this);
+		this.door = new ElevatorDoor();
+		this.motor = new Motor();
+		
+		//temporarily initialize as empty lists
+		this.buttons = new ArrayList<>();
+		this.lamps = new ArrayList<>();
+
 	}
 	
 	/**
@@ -34,22 +64,50 @@ public class Elevator extends Thread {
 	public void run() {
 		while(true) {
 			
-			ElevatorEvent event;
 			
-			synchronized(boxToScheduler) {
-				try {
-					boxToScheduler.wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				
-				event = boxToScheduler.removeTop();
-				
-				Main.safePrint("Elevator Got:\t" + event.toString());
-			}
+			//**********************************************
+			// 			GET MESSAGE FROM SCHEDULER
+			//**********************************************
 			
-			synchronized(boxToScheduler) {
-				boxToScheduler.notifyAll();
+			String message = messenger.getMessage();
+			
+			switch (message) {
+				case "UP":
+					currentState = State.UP;
+					motor.move(message);
+					//get new currentFloor by contacting ArrivalSensor
+						//ArrivalSensor sends message to scheduler with new floor
+					currentFloor = sensor.checkNextFloor();
+					break;
+					
+				case "DOWN":
+					currentState = State.DOWN;
+					motor.move(message);
+					//get new currentFloor by contacting ArrivalSensor
+						//ArrivalSensor sends message to scheduler with new floor
+					currentFloor = sensor.checkNextFloor();
+					break;
+					
+				case "STOP":
+					currentState = State.IDLE;
+					motor.stop(currentFloor);
+					break;
+					
+				case "OPENDOORS":
+					currentState = State.DOORSOPENING;
+					door.openDoors();
+					break;
+					
+				case "CLOSEDOORS":
+					currentState = State.DOORSCLOSING;
+					door.closeDoors();
+					break;
+					
+				case "CONTINUE":
+					if(currentState == State.UP || currentState == State.DOWN) {
+						currentFloor = sensor.checkNextFloor();
+					}
+					break;
 			}
 		}
 	}
@@ -61,6 +119,7 @@ public class Elevator extends Thread {
 	 * @param d - Direction the elevator must move to reach desired floor
 	 * @param desiredFloor - int representing the desired floor that has been requested to go to
 	 */
+	
 	private void move(int currentFloor, int dir, int desiredFloor) {
 		if(dir>0) {
 			System.out.println("Elevator is currently on floor " + currentFloor);
@@ -78,4 +137,18 @@ public class Elevator extends Thread {
 		}
 		this.currentFloor=currentFloor;
 	}
+	
+	public int getFloor() {
+		return this.currentFloor;
+	}
+	
+	public Message getMessenger() {
+		return this.messenger;
+	}
+	
+	public String getCurrentState() {
+		return this.currentState.toString();
+	}
+	
+	
 }
