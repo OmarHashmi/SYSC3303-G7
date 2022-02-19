@@ -41,6 +41,8 @@ class Floor extends Thread{
     		
         	schedulerBox.notifyAll();
         	
+        	
+        	/* uncomment later to be used to confirm floor has received passengers
         	while(true) {
 	        	try {
 					schedulerBox.wait();
@@ -49,6 +51,7 @@ class Floor extends Thread{
 					e.printStackTrace();
 				}
         	}
+        	*/
         	
         	
 		}
