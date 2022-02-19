@@ -41,12 +41,16 @@ class Floor extends Thread{
     		
         	schedulerBox.notifyAll();
         	
-        	try {
-				schedulerBox.wait();
-				System.out.println("Floor Received Passengers");
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+        	while(true) {
+	        	try {
+					schedulerBox.wait();
+					System.out.println("Floor Received Passengers");
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+        	}
+        	
+        	
 		}
     	
 //    	while (true) {
