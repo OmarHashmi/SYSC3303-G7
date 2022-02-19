@@ -14,35 +14,42 @@ public class Box {
 		this.data = new ArrayList<ElevatorEvent>();
 	}
 	
-    public boolean isEmpty() {
+    public synchronized boolean isEmpty() {
     	return data.isEmpty();
     }
 
-    public void add(ElevatorEvent event) {
+    public synchronized void add(ElevatorEvent event) {
     	this.data.add(event);
     }
+    /**
+     * Add an array list of elevator events to the box
+     * @param array list of elevator events
+     */
+    public synchronized void add(ArrayList<ElevatorEvent> events) {
+    	this.data.addAll(events);
+    }
     
-    public ElevatorEvent get(int index) {
+    public synchronized ElevatorEvent get(int index) {
     	if(index<0 || index>=data.size() || data.isEmpty()) {
     		return null;
     	}
     	return data.get(index);
     }
-    public ElevatorEvent get() {
+    public synchronized ElevatorEvent get() {
     	return this.get(data.size()-1);
     }
     
-    public ElevatorEvent remove(int index) {
+    public synchronized ElevatorEvent remove(int index) {
     	if(index<0 || index>=data.size() || data.isEmpty()) {
     		return null;
     	}
     	return data.remove(index);
     }
-    public ElevatorEvent remove() {
+    public synchronized ElevatorEvent remove() {
     	return this.remove(data.size()-1);
     }
     
-    public String toString() {
+    public synchronized String toString() {
     	return data.toString();
     }
 }
