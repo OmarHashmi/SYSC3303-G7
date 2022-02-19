@@ -17,19 +17,20 @@ public class Elevator extends Thread {
 		IDLE,
 		UP,
 		DOWN,
-		DOORCLOSING,
-		DOOROPENING
+		DOORSCLOSING,
+		DOORSOPENING
 	}
 
-	private Box schedulerBox;
+	//box to communicate with scheduler
+	private Message messenger;
 	private Scheduler scheduler;
 	private int currentFloor;
 	private State currentState;
 	
 	// Subsystem variables
 	private ArrivalSensor sensor;
-	//private ElevatorButton buttons[];
-	//private ElevatorLamp lamps[];
+	private ArrayList<ElevatorButton> buttons;
+	private ArrayList<ElevatorLamp> lamps;
 	private ElevatorDoor door;
 	private Motor motor;
 
@@ -38,10 +39,21 @@ public class Elevator extends Thread {
 	 * 
 	 * @param schedulerBox The communication channel to scheduler
 	 */
-	public Elevator(Box schedulerBox, Scheduler scheduler) {
-		this.schedulerBox = schedulerBox;
+	public Elevator(Message messenger, Scheduler scheduler) {
+		this.messenger = messenger;
 		this.scheduler = scheduler;
+		
+		this.currentState = State.IDLE;
 		this.currentFloor = 0;
+		
+		this.sensor = new ArrivalSensor(this);
+		this.door = new ElevatorDoor();
+		this.motor = new Motor();
+		
+		//temporarily initialize as empty lists
+		this.buttons = new ArrayList<>();
+		this.lamps = new ArrayList<>();
+
 	}
 	
 	/**
@@ -51,29 +63,51 @@ public class Elevator extends Thread {
 	 */
 	public void run() {
 		while(true) {
-	
-			
-			while(!schedulerBox.isEmpty()) {
-				ElevatorEvent event = schedulerBox.remove();
-				
-				Main.safePrint("Elevator Got:\t" + event.toString());
-				
-				if(door.checkDoorState().equals("OPEN")) {
-					currentState = State.DOORCLOSING;
-					door.closeDoors();
-				}
-			}
-							
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				System.exit(1);
-			}
 			
 			
-			synchronized(schedulerBox) {
-				schedulerBox.notifyAll();
+			//**********************************************
+			// 			GET MESSAGE FROM SCHEDULER
+			//**********************************************
+			
+			String message = messenger.getMessage();
+			
+			switch (message) {
+				case "UP":
+					currentState = State.UP;
+					motor.move(message);
+					//get new currentFloor by contacting ArrivalSensor
+						//ArrivalSensor sends message to scheduler with new floor
+					currentFloor = sensor.checkNextFloor();
+					break;
+					
+				case "DOWN":
+					currentState = State.DOWN;
+					motor.move(message);
+					//get new currentFloor by contacting ArrivalSensor
+						//ArrivalSensor sends message to scheduler with new floor
+					currentFloor = sensor.checkNextFloor();
+					break;
+					
+				case "STOP":
+					currentState = State.IDLE;
+					motor.stop(currentFloor);
+					break;
+					
+				case "OPENDOORS":
+					currentState = State.DOORSOPENING;
+					door.openDoors();
+					break;
+					
+				case "CLOSEDOORS":
+					currentState = State.DOORSCLOSING;
+					door.openDoors();
+					break;
+					
+				case "CONTINUE":
+					if(currentState == State.UP || currentState == State.DOWN) {
+						currentFloor = sensor.checkNextFloor();
+					}
+					break;
 			}
 		}
 	}
@@ -85,6 +119,7 @@ public class Elevator extends Thread {
 	 * @param d - Direction the elevator must move to reach desired floor
 	 * @param desiredFloor - int representing the desired floor that has been requested to go to
 	 */
+	
 	private void move(int currentFloor, int dir, int desiredFloor) {
 		if(dir>0) {
 			System.out.println("Elevator is currently on floor " + currentFloor);
@@ -102,4 +137,18 @@ public class Elevator extends Thread {
 		}
 		this.currentFloor=currentFloor;
 	}
+	
+	public int getFloor() {
+		return this.currentFloor;
+	}
+	
+	public Message getMessenger() {
+		return this.messenger;
+	}
+	
+	public String getCurrentState() {
+		return this.currentState.toString();
+	}
+	
+	
 }

@@ -9,12 +9,16 @@ public class Motor {
 	}
 	
 	public void move(String direction) {
-		System.out.println("Elevator Moving " + direction);
-		this.moving = true;
+		if(moving == false) {
+			System.out.println("Elevator Moving " + direction);
+			this.moving = true;
+		}
 	}
 	
 	public void stop(int floorNum){
-		System.out.println("Elevator Stopping at floor " + floorNum);
-		this.moving = false;
+		if(moving == true) {
+			System.out.println("Elevator Stopping at floor " + floorNum);
+			this.moving = false;
+		}
 	}
 }
