@@ -59,155 +59,13 @@ public class Scheduler extends Thread{
 			
 			System.out.println(sequence.toString());
 			
-			List<Integer> floorsToVisit = new ArrayList<Integer>();
-			int sequenceDir = 0;
-			int currentFloor = 0;
-			for(List<ElevatorEvent> s: sequence) {
-				
-				for( ElevatorEvent e: s) {				//create list of floors to visit
-					floorsToVisit.add(e.getStartFloor());
-					floorsToVisit.add(e.getEndFloor());
-					sequenceDir = e.getDir();
-					
-				}
-								
-				floorsToVisit = floorsToVisit.stream().distinct().collect(Collectors.toList());		//remove duplicates from floors to visit
-				
-				if(sequenceDir == 1) { 					//if direction is up, sort list in ascending order.
-					Collections.sort(floorsToVisit); 
-				}
-				else {									//else sort list in descending order
-					Collections.sort(floorsToVisit, Collections.reverseOrder()); 
-				}
-				
-				System.out.println("\nFloors to visit " + floorsToVisit);
-				
-				//find way to account for if we start on floor 0
-				//sendInstructionsToElevator(moveUp);
-				/*
-				if(currentFloor == 0) {
-					sendInstructionsToElevator(openDoors);
-					sendInstructionsToElevator(closeDoors);
-					sendInstructionsToElevator(moveUp);
-				}
-				*/
-				
-				boolean arrived = false;
-				for(int i = 0; i < floorsToVisit.size(); i++) {
-					while(!arrived) {
-						if((currentFloor == floorsToVisit.get(i)) && i == 0){
-							Main.safePrint("Arrived at floor to visit - start: " + currentFloor);
-							sendInstructionsToElevator(openDoors);
-							sendInstructionsToElevator(closeDoors);
-							if(sequenceDir == 1) {
-								sendInstructionsToElevator(moveUp);
-							}
-							else{
-								sendInstructionsToElevator(moveDown);
-							}
-							arrived = true;
-						}
-						else if(i == 0) {
-							if(sequenceDir == 1) {
-								sendInstructionsToElevator(moveUp);
-							}
-							else{
-								sendInstructionsToElevator(moveDown);
-							}
-						}
-						
-						if((currentFloor == floorsToVisit.get(i)) && (i == floorsToVisit.size() - 1)) {
-							Main.safePrint("Arrived at floor to visit - stop: " + currentFloor);
-							sendInstructionsToElevator(openDoors);
-							sendInstructionsToElevator(closeDoors);
-							sendInstructionsToElevator(stop);
-							arrived = true;
-						}
-						else if((currentFloor == floorsToVisit.get(i)) && (i != 0)) {
-							Main.safePrint("Arrived at floor to visit - continue: " + currentFloor);
-							sendInstructionsToElevator(openDoors);
-							sendInstructionsToElevator(closeDoors);
-							sendInstructionsToElevator(continueMove);
-							arrived = true;
-							
-						}
-						else if(i>0) {
-							Main.safePrint("Not this floor");
-							sendInstructionsToElevator(continueMove);
-						}
-				
-						
-						currentFloor = Integer.parseInt(messenger.getFloor());
-						Main.safePrint("Current floor " + currentFloor);
-					}
-					arrived = false;
-					
-				}
-				
-				System.out.println("Sequence finished\n");
-				
-				floorsToVisit = new ArrayList<Integer>();
-				
-			}
+			communicateWithElevator();
 			
-
 			/*
-			 * pseudo code
-			 * get floor from elevator
-			 * set direction of elevator based on difference of floors
-			 * start motor
-			 * receive floor updates from Elevator
-			 * 	- if elevator is at correct starting floor - open doors, close doors, move in direction as before
-			 * 	- if elevator is at wrong floor - keep moving
-			 * 	- if elevator is at final floor in sequence - open door, close doors, start next sequence
-			 * 
-			 * 
-			 * organize floors into an array 
-			 * start floor = starting floor in array
-			 * destination floor = first destination floor in array 
-			 * 
-			 * wait() to receive current floor from elevator
-			 * 
-			 * while(not at start floor){
-			 * 	if current floor == start event floor
-			 * 		open and close door
-			 * 		set the direction to event direction
-			 *  	start motor
-			 *  	set lamp
-			 *  	exit while loop
-			 * 	else if current floor is > current event floor
-			 * 		set direction to up , start motor
-			 * 	else if current floor is < current event floor 
-			 * 		set direction to down, start motor
-			 * }
-			 * 
-			 * move elevator in event direction
-			 * 
-			 * while(theres floors in the array){
-			 * 
-			 * 	wait and get floor updates from Elevator.java
-			 * 	if(elevator reaches the first destination floor)
-			 * 		stop motor
-			 * 		if(not the last destination floor)
-			 * 			turn on lamp if not already on
-			 * 		if(destination is a end floor for an event)
-			 * 			turn off lamp
-			 * 		open door
-			 * 		close door
-			 * 		destination floor = next destination floor
-			 * 	else
-			 * 		do nothing
-			 * 
-			 * 		
-			 * }
-			 * 
-			 * repeat for next sequences
-			 * 
-			 */
-			
 			synchronized(floorBox) {
 				floorBox.notifyAll();
 			}
+			*/
 		}
 	}
 	
@@ -271,27 +129,151 @@ public class Scheduler extends Thread{
 	}
 	
 	/**
-	 * 
-	 * @param  
+	 * Takes a string from the set instruction list and sends it to the Elevator 
+	 * @param  Takes in a string of one of the preset instructions
 	 */
-	public void sendInstructionsToElevator(String message) {
+	public void sendInstruction(String message) {
 		
 		//Main.safePrint("Scheduler Sent:\t" + message);
-		messenger.setMessage(message);
-		/*
-		elevatorBox.add(events);
-		elevatorBox.notifyAll();
-		
-		try {
-			elevatorBox.wait();
-			System.out.println("Scheduler Notified of Passenger Arrival");
-		} catch (InterruptedException err) {
-			err.printStackTrace();
-		}
-		*/
-		
+		messenger.setMessage(message);		
 	}
-	
+	/**
+	 * communicateWithElevator() uses the sequence list gathered by organizeEvents and uses that list to 
+	 * communicate with the elevator using sendInstruction() to determine what the elevators next instruction will be
+	 * @param void
+	 */
+	public void communicateWithElevator() {
+
+		List<Integer> floorsToVisit = new ArrayList<Integer>();
+		int sequenceDir = 0;
+		int currentFloor = 0;
+		
+		for(List<ElevatorEvent> s: sequence) {
+			
+			for( ElevatorEvent e: s) {				//create list of floors to visit
+				floorsToVisit.add(e.getStartFloor());
+				floorsToVisit.add(e.getEndFloor());
+				sequenceDir = e.getDir();
+				
+			}
+							
+			floorsToVisit = floorsToVisit.stream().distinct().collect(Collectors.toList());		//remove duplicates from floors to visit
+			
+			if(sequenceDir == 1) { 					//if direction is up, sort list in ascending order.
+				Collections.sort(floorsToVisit); 
+			}
+			else {									//else sort list in descending order
+				Collections.sort(floorsToVisit, Collections.reverseOrder()); 
+			}
+			
+			System.out.println("\nFloors to visit " + floorsToVisit);				
+			//System.out.println("\ndirection " + sequenceDir);				
+
+			try {
+				TimeUnit.SECONDS.sleep(1);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+			boolean arrived = false;
+			boolean arrivedAtLastFloor = false;
+			
+			//loop through each index in the list of floors to visit
+			for(int i = 0; i <= floorsToVisit.size(); i++) {
+				//loop while the elevator has not reached the destination floor 
+				while(!arrived) {
+					/*If the current floor in the opposite direction of the destination floor from
+					* the starting floor, move up or down repeatedly until we reach the starting floor
+					*/
+					if((currentFloor < floorsToVisit.get(i) && sequenceDir == -1)) {
+						sendInstruction(moveUp);
+					}
+					else if((currentFloor > floorsToVisit.get(i) && sequenceDir == 1)) {
+						sendInstruction(moveDown);
+					}
+					//Else if the current floor is the starting floor set the movement direction from there
+					else if((currentFloor == floorsToVisit.get(i)) && i == 0){
+						Main.safePrint("Arrived at floor to visit - start: " + currentFloor);
+						sendInstruction(openDoors);
+						sendInstruction(closeDoors);
+						if(sequenceDir == 1) {
+							sendInstruction(moveUp);
+						}
+						else{
+							sendInstruction(moveDown);
+						}
+						arrived = true;
+					}
+					//else set the direction to either up or down depending on the sequence
+					else if(i == 0) {
+						if(sequenceDir == 1) {
+							sendInstruction(moveUp);
+						}
+						else{
+							sendInstruction(moveDown);
+						}
+					}
+					//If the current floor is the last floor to visit don't move the elevator after it stopped
+					if((currentFloor == floorsToVisit.get(i)) && (i == floorsToVisit.size() - 1)) {
+						Main.safePrint("Arrived at floor to visit - stop: " + currentFloor);
+						sendInstruction(stop);
+						sendInstruction(openDoors);
+						sendInstruction(closeDoors);
+						arrived = true;
+						arrivedAtLastFloor = true;
+					}
+					/*else if the elevator is at a destination floor before the last floor
+					* stop the elevator for a moment before starting up again
+					*/
+					else if((currentFloor == floorsToVisit.get(i)) && (i != 0)) {
+						Main.safePrint("Arrived at floor to visit - continue: " + currentFloor);
+						sendInstruction(stop);
+						sendInstruction(openDoors);
+						sendInstruction(closeDoors);
+						
+						if(sequenceDir == 1) {
+							sendInstruction(moveUp);
+						}
+						else{
+							sendInstruction(moveDown);
+						}
+						
+						arrived = true;
+						
+					}
+					//else continue to move the elevator in it's previously set direction
+					else if(i>0) {
+						Main.safePrint("Not this floor");
+						sendInstruction(continueMove);
+					}
+					
+					//if the arrived at destination floor is not the last destination floor get the next floor
+					if(!arrivedAtLastFloor) {
+						currentFloor = Integer.parseInt(messenger.getFloor());
+					}
+				}
+				
+				//if the current index is not the last one set the loop to go again
+				if(i != floorsToVisit.size() - 1) {
+					arrived = false;
+				}				
+			}
+			
+			//sleep to account for the last doors to open and close
+			try {
+				TimeUnit.SECONDS.sleep(7);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+			System.out.println("Sequence finished\n");
+		
+			floorsToVisit = new ArrayList<Integer>();
+			
+		}
+	}
 	
 	/**
 	 * Places a request by added RequestData to requests.
@@ -346,4 +328,8 @@ public class Scheduler extends Thread{
 		}
 		return null;
 	}
+	
+	
+	
+	
 }
