@@ -1,5 +1,6 @@
 package tests;
 import project.*;
+import data.*;
 
 import static org.junit.Assert.*;
 
@@ -10,6 +11,9 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.junit.Test;
+
+import data.Box;
+import data.ElevatorEvent;
 
 
 

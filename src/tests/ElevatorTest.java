@@ -1,8 +1,12 @@
 package tests;
 import project.*;
+import data.*;
 
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+
+import data.Box;
+import data.Message;
 
 
 public class ElevatorTest {
