@@ -1,6 +1,8 @@
 package project;
 
 import java.util.*;
+
+import data.*;
 //import java.util.Arrays;
 //import java.util.Date;
 import elevator.*;
@@ -120,9 +122,9 @@ public class Elevator extends Thread {
 	 * @param desiredFloor - int representing the desired floor that has been requested to go to
 	 */
 	
-	private void move(int currentFloor, int dir, int desiredFloor) {
+	public void move(int currentFloor, int dir, int desiredFloor) {
 		if(dir>0) {
-			System.out.println("Elevator is currently on floor " + currentFloor);
+			//System.out.println("Elevator is currently on floor " + currentFloor);
 			for(;currentFloor>=desiredFloor; currentFloor--) {
 				//System.out.println("Elevator is now at floor: " + currentFloor);
 			}

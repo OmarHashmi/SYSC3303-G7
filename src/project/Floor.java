@@ -1,8 +1,10 @@
 package project;
+import data.*;
 
 import java.io.File; 
 import java.text.SimpleDateFormat;
 import java.util.*;
+
 
 /**
  * Floor Subsystem Class
@@ -10,7 +12,7 @@ import java.util.*;
  * @author Thomas Poetting
  * @author Sam Al Zoubi
  */
-class Floor extends Thread{
+public class Floor extends Thread{
 	private Box schedulerBox;
 	private Scheduler scheduler;
 	private ArrayList<ElevatorEvent> elevatorEvents = new ArrayList<ElevatorEvent>();
@@ -90,5 +92,9 @@ class Floor extends Thread{
 		catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public ArrayList<ElevatorEvent> getElevatorEvents(){
+		return elevatorEvents;
 	}
 }
