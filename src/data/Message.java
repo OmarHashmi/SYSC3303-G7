@@ -1,4 +1,4 @@
-package project;
+package data;
 
 // @author Tom P
 public class Message {

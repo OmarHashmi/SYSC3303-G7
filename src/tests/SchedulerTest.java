@@ -1,5 +1,6 @@
 package tests;
 import project.*;
+import data.*;
 
 import static org.junit.Assert.assertTrue;
 
@@ -7,6 +8,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import org.junit.Test;
+
+import data.Box;
+import data.ElevatorEvent;
+import data.Message;
 
 
 public class SchedulerTest {

@@ -1,6 +1,8 @@
 package project;
 
 import java.util.*;
+
+import data.*;
 //import java.util.Arrays;
 //import java.util.Date;
 import elevator.*;
