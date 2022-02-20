@@ -1,28 +1,44 @@
-Tom Pieroni: 
-UML Class Diagram
-UML Sequence Diagram
-boxTest.java (Junit test)
-floorTest.java (Junit test)
-Added test instructions to Readme
-
-Omar Hashmi:
-Created ElevatorEvent class
-Updated file reading to parse it into ElevatorEvent format
-Added install instructions to readme
-Setup communication between subsystems
-
-Sam Z:
-Created the skeleton for the Elevator run method and move method
-Created the callForElevator, processUserCall and completeCall methods for Scheduler
+Tom Pieroni:
+Elevator Subsystem
+Motor Class
+ArrivalSensor Class
+ElevatorDoor Class
+ElevatorButton Class
+ElevatorLamp Class
+Made the elevator instruct appropriate types to perform action dependent on messages from the scheduler. E.g. move the motor down, open the doors
+Message Class
+Created framework for Elevator to communicate with scheduler and vice versa
+Elevator State machine
+Methods that respond to scheduler messages and update the elevator state accordingly
+Added States (UP, DOWN, IDLE, DOORSOPENING, DOORSCLOSING)
 
 Thomas Poetting:
-initialized Main.java (originally parentSubsystem)
-safePrint()
-inititalized Box.java
-put()
-pop() (originally get)
-get() (originally check)
-initialized Floor.java
-first draft of readFile()
-initialized Elevator.java
-initialized Scheduler.java
+Added more events to the elevator_events.txt to cover more kinds of events
+Changed scheduler to now take in the same messenger instance as Elevator.java
+Added to Box.java
+add(ArrayList<ElevatorEvent> events) - to be able to add a list of elevatorEvents
+Added to Message.java
+setFloor() -  takes the floor as a string from Elevator.java arrivalSensor 
+getFloor() - gets the set floor to be used by Scheduler.java
+Added to Scheduler.java;
+organizeEvents() - takes an array list of events from Floor.java and organizes them into sequences to be used by the scheduler later
+sendInstruction()  - takes in a string from the predeclared set of instructions and sends it to Elevator.java using Message.java
+communicateWithElevator() - is called after the sequences are organized and then uses that list of sequences to determine what instructions to send to sendInstructions() and communicate with the Elevator.java
+
+Omar Hashmi:
+Created test cases for subsystems
+Updated BoxTest
+Updated FloorTest
+Added SchedulerTest
+Added ElevatorTest
+Refactored box to clean code
+Separated data structures to new package
+
+Sam Zoubi:
+Move() method in elevator to move the elevator 
+ callForElevator() - communication between Floor and Scheduler. Sending elevator events to be scheduled by the Scheduler
+processUserCall() - communication between Elevator and Scheduler. To send elevator events from scheduler to elevator to execute.
+completeCall()- communication between Elevator and Scheduler. A method called by the Elevator class to the Scheduler class to inform the Scheduler it has completed its elevator event and arrived on the destination floor.
+Elevator and Scheduler State Machine Diagrams
+UML Class Diagram
+UML Sequence Diagram
