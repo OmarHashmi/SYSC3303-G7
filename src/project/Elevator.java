@@ -27,12 +27,14 @@ public class Elevator extends Thread {
 	private Message messenger;
 	private Scheduler scheduler;
 	private int currentFloor;
+	private int numfloors = 10;
 	private State currentState;
 	
 	// Subsystem variables
 	private ArrivalSensor sensor;
 	private ArrayList<ElevatorButton> buttons;
 	private ArrayList<ElevatorLamp> lamps;
+	private ArrayList<ArrivalSensor> sensors;
 	private ElevatorDoor door;
 	private Motor motor;
 
@@ -48,20 +50,31 @@ public class Elevator extends Thread {
 		this.currentState = State.IDLE;
 		this.currentFloor = 0;
 		
-		this.sensor = new ArrivalSensor(this);
+		this.sensor = new ArrivalSensor(0,this);
 		this.door = new ElevatorDoor();
 		this.motor = new Motor();
-		
-		//temporarily initialize as empty lists
+	
 		this.buttons = new ArrayList<>();
 		this.lamps = new ArrayList<>();
+		this.sensors = new ArrayList<>();
+		
+		// populate the lists with 10 elements each
+		for(int i=0;i<numfloors;i++) {
+			ElevatorLamp newLamp = new ElevatorLamp(i);
+			this.lamps.add(newLamp);
+			ElevatorButton newButton = new ElevatorButton(i,newLamp);
+			this.buttons.add(newButton);
+			ArrivalSensor newSensor = new ArrivalSensor(i, this);
+			this.sensors.add(newSensor);
+		}
 
 	}
 	
 	/**
-	 * Runs continuously once the thread is started until the program is terminated
-	 * Calls the scheduler to see if there is work to be done, moves accordingly, and then sends 
-	 * a message back to the scheduler that it has moved accordingly.
+	 * Method will run infinitely until program termination
+	 * Method will repeatedly check for a message from the scheduler in the "messenger", will respond and perform actions according to the message from scheduler ONLY IF
+	 * the current state of the elevator does not disqualify it from completing such behavior. e.g. Cannot move up/down when the doors are closing/opening
+	 * When the elevator is moving this method will check for the next floor the elevator will arrive on using the ArrivalSensors which will notify the scheduler of the elevator's location
 	 */
 	public void run() {
 		while(true) {
@@ -72,43 +85,61 @@ public class Elevator extends Thread {
 			//**********************************************
 			
 			String message = messenger.getMessage();
-			
+			System.out.println(this.getCurrentState());
+			System.out.println(message);
 			switch (message) {
+				// Can only move up when currently not moving	
 				case "UP":
-					currentState = State.UP;
-					motor.move(message);
-					//get new currentFloor by contacting ArrivalSensor
-						//ArrivalSensor sends message to scheduler with new floor
-					currentFloor = sensor.checkNextFloor();
+					//if(currentState == State.IDLE || currentState == State.UP) {
+						currentState = State.UP;
+						motor.move(message);
+						//get new currentFloor by contacting ArrivalSensor
+							//ArrivalSensor sends message to scheduler with new floor
+						move();
+					//}
 					break;
 					
+				// Can only move down when currently not moving	
 				case "DOWN":
-					currentState = State.DOWN;
-					motor.move(message);
-					//get new currentFloor by contacting ArrivalSensor
-						//ArrivalSensor sends message to scheduler with new floor
-					currentFloor = sensor.checkNextFloor();
+					//if(currentState == State.IDLE || currentState == State.DOWN) {
+						currentState = State.DOWN;
+						motor.move(message);
+						//get new currentFloor by contacting ArrivalSensor
+							//ArrivalSensor sends message to scheduler with new floor
+						move();
+					//}
 					break;
 					
+				// Can only stop moving if it is currently moving
 				case "STOP":
-					currentState = State.IDLE;
-					motor.stop(currentFloor);
+					//if(currentState == State.UP || currentState == State.DOWN) {
+						currentState = State.IDLE;
+						motor.stop(currentFloor);
+					//}
 					break;
 					
+				// Can only open doors if not moving (ElevatorDoor class will ignore this if the door is already open)	
 				case "OPENDOORS":
-					currentState = State.DOORSOPENING;
-					door.openDoors();
+					//if(currentState == State.IDLE) {
+						currentState = State.DOORSOPENING;
+						door.openDoors();
+						currentState = State.IDLE;
+					//}
 					break;
-					
+				// Can only close doors if not moving (ElevatorDoor class will ignore this if the door is already closed)		
 				case "CLOSEDOORS":
-					currentState = State.DOORSCLOSING;
-					door.closeDoors();
+					//if(currentState == State.IDLE) {
+						currentState = State.DOORSCLOSING;
+						door.closeDoors();
+						currentState = State.IDLE;
+					//}
 					break;
-					
+				
+				// valid for all states, will however only have action when elevator is moving 
 				case "CONTINUE":
-					if(currentState == State.UP || currentState == State.DOWN) {
-						currentFloor = sensor.checkNextFloor();
-					}
+					//if(currentState == State.UP || currentState == State.DOWN) {
+						move();
+					//}
 					break;
 			}
 		}
@@ -121,23 +152,16 @@ public class Elevator extends Thread {
 	 * @param d - Direction the elevator must move to reach desired floor
 	 * @param desiredFloor - int representing the desired floor that has been requested to go to
 	 */
-	
-	public void move(int currentFloor, int dir, int desiredFloor) {
-		if(dir>0) {
-			//System.out.println("Elevator is currently on floor " + currentFloor);
-			for(;currentFloor>=desiredFloor; currentFloor--) {
-				//System.out.println("Elevator is now at floor: " + currentFloor);
-			}
+
+	private void move() {
+		if(currentState == State.UP) {
+			this.currentFloor++;
+			sensors.get(currentFloor).notifyScheduler();
 		}
-		else if(dir<0) {
-			for(;currentFloor<=desiredFloor; currentFloor++) {
-				//System.out.println("Elevator is now at floor: "+ currentFloor);
-			}
+		else if(currentState == State.DOWN) {
+			this.currentFloor--;
+			sensors.get(currentFloor).notifyScheduler();
 		}
-		else if(currentFloor==desiredFloor){
-			//System.out.println("Arrived at destination");
-		}
-		this.currentFloor=currentFloor;
 	}
 	
 	public int getFloor() {
