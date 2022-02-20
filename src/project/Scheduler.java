@@ -13,9 +13,9 @@ public class Scheduler extends Thread{
 
 	private Box floorBox;
 	private Message messenger;
-	private ArrayList<ElevatorEvent> elevatorEvents = new ArrayList<ElevatorEvent>();
+	public ArrayList<ElevatorEvent> elevatorEvents = new ArrayList<ElevatorEvent>();
 	private ArrayList<ElevatorEvent> sendEvents = new ArrayList<ElevatorEvent>();
-	private ArrayList<List<ElevatorEvent>> sequence = new ArrayList<List<ElevatorEvent>>();
+	public ArrayList<List<ElevatorEvent>> sequence = new ArrayList<List<ElevatorEvent>>();
 	private String moveUp = "UP";
 	private String moveDown = "DOWN";
 	private String stop = "STOP";
