@@ -1,8 +1,10 @@
 package project;
+import data.*;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
 
 /**
  * Scheduler Subsystem Class
@@ -10,7 +12,15 @@ import java.util.stream.Collectors;
  * @author Thomas
  */
 public class Scheduler extends Thread{
-
+	public enum State{
+		UP,
+		DOWN,
+		STOP,
+		OPEN_DOORS,
+		CLOSE_DOORS,
+		CONTINUE
+	}
+	
 	private Box floorBox;
 	private Message messenger;
 	public ArrayList<ElevatorEvent> elevatorEvents = new ArrayList<ElevatorEvent>();
@@ -22,7 +32,6 @@ public class Scheduler extends Thread{
 	private String openDoors = "OPENDOORS";
 	private String closeDoors = "CLOSEDOORS";
 	private String continueMove = "CONTINUE";
-
 
 	/**
 	 * Constructor for the Scheduler
@@ -60,12 +69,6 @@ public class Scheduler extends Thread{
 			System.out.println(sequence.toString());
 			
 			communicateWithElevator();
-			
-			/*
-			synchronized(floorBox) {
-				floorBox.notifyAll();
-			}
-			*/
 		}
 	}
 	
@@ -264,7 +267,6 @@ public class Scheduler extends Thread{
 			try {
 				TimeUnit.SECONDS.sleep(7);
 			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			
@@ -273,39 +275,6 @@ public class Scheduler extends Thread{
 			floorsToVisit = new ArrayList<Integer>();
 			
 		}
-	}
-	
-	/**
-	 * Places a request by added RequestData to requests.
-	 * Notifies available elevators to accept new request
-	 * 
-	 * @param 
-	 */
-	public synchronized void callForElevator(ElevatorEvent event) {
-		this.elevatorEvents.add(event);
-		notifyAll();
-	};
-	
-	/**
-	 * Method invoked by Elevator subsystem to accept new request to fulfill
-	 * 
-	 * @return RequestData - peek of the first RequestData in requests queue
-	 * @throws ParseException
-	 */
-	public synchronized ElevatorEvent processUserCall() {
-		while(this.elevatorEvents.isEmpty()) {
-			try {
-				wait();
-			}catch(InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		ElevatorEvent event = elevatorEvents.get(elevatorEvents.size()-1);
-		
-		notifyAll();
-		
-		return event;
 	}
 		
 	/**
@@ -328,8 +297,4 @@ public class Scheduler extends Thread{
 		}
 		return null;
 	}
-	
-	
-	
-	
 }

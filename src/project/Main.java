@@ -1,4 +1,5 @@
 package project;
+import data.*;
 
 /**
  * Parent process that initializes and starts the other threads
