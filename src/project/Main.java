@@ -9,21 +9,25 @@ import data.*;
 public class Main {
     
 	public static void main(String[] args) {
-		Box floorScheduler = new Box();
-		//Box elevatorScheduler = new Box();
-		Message messenger = new Message();
 
-		Scheduler scheduler = new Scheduler(floorScheduler, messenger);
-		Floor floor = new Floor(floorScheduler, scheduler);
-		Elevator elevator = new Elevator(messenger, scheduler);
-		
+
+
+		Scheduler scheduler = new Scheduler();
+		Floor floor = new Floor();
+		ElevatorCommunication elevatorCommunication = new ElevatorCommunication();
+
+
+
+
 		Thread schedulerThread = scheduler;
-        Thread floorThread = floor;	       
-        Thread elevatorThread = elevator;
-        		
-        floorThread.start(); 
-        schedulerThread.start(); 
-        elevatorThread.start();
+		Thread elevatorCommunicationThread = elevatorCommunication;
+        Thread floorThread = floor;
+
+
+        floorThread.start();
+        schedulerThread.start();
+		elevatorCommunication.start();
+
 	}
 	
 	/**

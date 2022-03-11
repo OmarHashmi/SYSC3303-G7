@@ -1,6 +1,10 @@
 package project;
 import data.*;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -20,6 +24,22 @@ public class Scheduler extends Thread{
 		CLOSE_DOORS,
 		CONTINUE
 	}
+
+	static int SELFPORT = 219;
+	private DatagramPacket sendPacket, receivePacket;
+	private  DatagramSocket sendSocket, receiveSocket;
+
+	State elevatorState1, elevatorState2, elevatorState3, elevatorState4;
+
+	private int  elevatorFloor1, elevatorFloor2, elevatorFloor3, elevatorFloor4;
+
+
+
+
+	static int ELEVATORPORT1 = 69, ELEVATORPORT2 = 70, ELEVATORPORT3 = 71, ELEVATORPORT4 = 72, //-- WHEN WE HAVE MULTIPLE CARS
+			PACKETSIZE = 25,  FLOORPORT = 238;
+
+
 	
 	private Box floorBox;
 	private Message messenger;
@@ -36,40 +56,290 @@ public class Scheduler extends Thread{
 	/**
 	 * Constructor for the Scheduler
 	 * 
-	 * @param floorBox	Communication channel to the floor
-	 * @param messenger Communication channel to the elevator
+	 *
 	 */
-	public Scheduler(Box floorBox, Message messenger) {
+	public Scheduler() {
 		this.floorBox = floorBox;
 		this.messenger = messenger;
+
+		try {
+			// Construct a datagram socket and bind it to any available
+			// port on the local host machine. This socket will be used to
+			// send UDP Datagram packets.
+			sendSocket = new DatagramSocket();
+
+			// Construct a datagram socket and bind it to port 23
+			// on the local host machine. This socket will be used to
+			// receive UDP Datagram packets from the client
+			receiveSocket = new DatagramSocket(SELFPORT);
+
+			// to test socket timeout (2 seconds)
+			//receiveSocket.setSoTimeout(2000);
+		} catch (SocketException se) {
+			se.printStackTrace();
+			System.exit(1);
+		}
 	}
+
+	private void sendElevator(int elev, int floor, byte msg[]) {
+		//from the best elevator create the correct packet and send
+		//correct data
+		int toPort;
+		//assign proper port
+		switch(elev) {
+			case(4):
+				toPort = ELEVATORPORT4;
+				if(msg[1] == 1) {
+					elevatorState4 = State.UP;
+				}
+				else if(msg[1] == 0){
+					elevatorState4 = State.DOWN;
+				}
+			case(3):
+				toPort = ELEVATORPORT3;
+				if(msg[1] == 1) {
+					elevatorState4 = State.UP;
+				}
+				else if(msg[1] == 0){
+					elevatorState4 = State.DOWN;
+				}
+			case(2):
+				toPort = ELEVATORPORT2;
+				if(msg[1] == 1) {
+					elevatorState4 = State.UP;
+				}
+				else if(msg[1] == 0){
+					elevatorState4 = State.DOWN;
+				}
+			default:
+				toPort = ELEVATORPORT1;
+				if(msg[1] == 1) {
+					elevatorState4 = State.UP;
+				}
+				else if(msg[1] == 0){
+					elevatorState4 = State.DOWN;
+				}
+		}
+
+		sendPacket = new DatagramPacket(msg, msg.length,
+				receivePacket.getAddress(), 68); // 68 is supposed to be the Port ElevatorCommunication listens too
+													// which will then communicate with out Elevator class
+
+		try {
+			sendSocket.send(sendPacket);
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+
+		System.out.println("Server: packet sent");
+
+	}
+
+	// THIS IS THE POINT OF COMMUNICATION - WHERE SCHEDULER RECEIVES PACKETS AND SENDS THEM
+
+	public void receiveAndSend(){
+		byte data[] = new byte[25];
+		byte msg[] = new byte[25];
+		receivePacket = new DatagramPacket(data, data.length);
+		System.out.println("Scheduler: Waiting for Packet.\n");
+
+		// Block until a datagram packet is received from receiveSocket.
+		try {
+			System.out.println("Waiting..."); // so we know we're waiting
+			receiveSocket.receive(receivePacket);
+
+			//catch IO exception and print stack trace
+		} catch (IOException e) {
+			System.out.print("IO Exception: likely:");
+			System.out.println("Receive Socket Timed Out.\n" + e);
+			e.printStackTrace();
+			System.exit(1);
+		}
+
+		// Process the received datagram.
+		System.out.println("Scheduler: Packet received:");
+		System.out.println("From host: " + receivePacket.getAddress());
+		System.out.println("Host port: " + receivePacket.getPort());
+
+		int fromPort = receivePacket.getPort(); // if fromPort is not equal to ELEVATORPORT 1 2 3 or 4 then it is a packet received from client!
+
+		int len = receivePacket.getLength();
+		System.out.println("Length: " + len);
+		System.out.print("Containing in Bytes: " );
+		System.out.println(Arrays.toString(this.receivePacket.getData()));
+		System.out.print("Containing in String: " );
+		System.out.println(new String(this.receivePacket.getData(), 0, len));
+
+
+		// This is where you would process the elevator datagram...
+
+		//decode request and assign toFloor as the floor that will be sent to elevator
+		if(fromPort == ELEVATORPORT1 || fromPort == ELEVATORPORT2 || fromPort == ELEVATORPORT3 || fromPort == ELEVATORPORT4) { //-- WHEN WE HAVE MULTIPLE CARS
+			//received from elevator
+			//         				0				1					2
+			// data contains [ elevator number, direction (1 or 0), floorNumber]
+
+			System.out.println("Received from elevator");
+			int elevatorNumber = data[0];
+			int floorNumber = data[2];
+			int currFloor;
+
+			//update the correct elevator
+			if (elevatorNumber == 1) {
+				//direction: 0 = stop; 1 = up; 2 = down
+				if(data[1] == 1) {
+					this.elevatorState1 = State.UP;
+				}
+				else if(data[1] == 0){
+					this.elevatorState1 = State.DOWN;
+				}
+				elevatorFloor1 = floorNumber;
+				System.out.println("\n Updating E1: " + elevatorState1 + ", " + elevatorFloor1 + "\n");
+			}
+
+			msg[0] = data[0];
+			msg[1] = data[1];
+			msg[2] = data[2];
+			sendPacket = new DatagramPacket(msg, msg.length,
+					receivePacket.getAddress(), FLOORPORT);
+			try {
+				sendSocket.send(sendPacket);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+		}
+
+		else {
+
+
+			// if it was from floor which means someone wants an elevator...
+			System.out.println("Received from Floor");
+			int toFloor = 0;
+			int direction = data[0];
+
+
+			//         0             1               2
+
+			// data [direction, current floor, destination floor]
+
+			msg[1] = (byte) direction; //direction
+
+			toFloor = data[2];
+
+			msg[2] = data[1];
+			msg[3] = data[2];
+
+
+			///int toElevator = getBestElevator(toFloor, direction); // get best elevator -- waiting for MULTIPLE CARS
+			//msg[0] = (byte) toElevator;
+			msg[0] = (byte) 1;
+
+			// msg to elevator will contain [elevator number, direction/state, current floor, destination floor]
+
+			sendElevator(1, toFloor, msg); // then send the packet to elevator
+
+			System.out.println("Server: Sending packet:");
+			System.out.println("To host: " + sendPacket.getAddress());
+			System.out.println("Destination host port: " + sendPacket.getPort());
+			len = sendPacket.getLength();
+			System.out.println("Length: " + len);
+			System.out.print("Containing: ");
+			System.out.println(new String(sendPacket.getData(), 0, len));
+			System.out.println(Arrays.toString(this.receivePacket.getData()) + "\n");
+		}
+
+	}
+
+	// get the best elevator to send to user -- WHEN WE HAVE MULTIPLE CARS
+
+	private int getBestElevator(int toFloor, int direction) {
+		//from current data which elevator is best to send
+		//check to see if any elevator status is marked as idle. if it is return that one!
+		if(elevatorState1 == State.STOP ) return 1;
+		if(elevatorState2 == State.STOP ) return 2;
+		if(elevatorState3 == State.STOP) return 3;
+		if(elevatorState4 == State.STOP) return 4;
+
+
+		//No Elevator idle Check other specs to find best a case
+
+		if((elevatorState1 == State.UP && direction == 1) && toFloor >= elevatorFloor1)
+			return 1;
+		if((elevatorState2 == State.UP && direction == 1 ) && toFloor >= elevatorFloor2)
+			return 2;
+		if((elevatorState3 == State.UP && direction == 1) && toFloor >= elevatorFloor3)
+			return 3;
+		if((elevatorState4 == State.UP && direction == 1 && toFloor >= elevatorFloor4))
+			return 4;
+		if((elevatorState1 == State.DOWN && direction == 2) && toFloor <= elevatorFloor1)
+			return 1;
+		if((elevatorState2 == State.DOWN && direction == 2) && toFloor <= elevatorFloor2)
+			return 2;
+		if((elevatorState3 == State.DOWN && direction == 2) && toFloor <= elevatorFloor3)
+			return 3;
+		if((elevatorState4 == State.DOWN && direction == 2) && toFloor <= elevatorFloor4)
+			return 4;
+
+		//Implementation should prevent any situation where all of these fail; however recall function
+		return getBestElevator(toFloor, direction);
+	}
+
+
+
 
 	/**
 	 * Thread loop for Elevator
 	 */
 	public void run(){
 		while(true) {
-			synchronized(floorBox) {
-				try {
-					floorBox.wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				
-				while(!floorBox.isEmpty()) {
-					elevatorEvents.add(floorBox.remove(0));
-				}
+			this.receiveAndSend();
 			}
+			/**
+
+			byte[] data = new byte[100];
+			floorReceivePacket = new DatagramPacket(data, data.length);
+			try {
+
+				receiveFloorSocket.receive(floorReceivePacket);
+			} catch (IOException e) {
+				System.out.print("IO Exception: likely:");
+				e.printStackTrace();
+				System.exit(1);
+			}
+
+			// Process the received datagram from Floor
+			System.out.println("Scheduler: Packet received from Floor:");
+			System.out.println("From host: " + floorReceivePacket.getAddress());
+			System.out.println("Host port: " + floorReceivePacket.getPort());
+			int len = floorReceivePacket.getLength();
+			System.out.println("Length: " + len);
+			System.out.print("Containing in String: " );
+			System.out.println(new String(floorReceivePacket.getData(), 0, len));
+			System.out.print("Containing in Bytes: ");
+			System.out.println(Arrays.toString(floorReceivePacket.getData()));
+			System.out.println("\n");
+
+
+
 			
 			Main.safePrint("Scheduler Got:\t" + elevatorEvents);
+			Main.safePrint("Scheduler Got:\t" + new String(floorReceivePacket.getData()));
+
+			// maybe I should fill the elevator events list with the data in the floor receive packet, it will be in bytes
+			// then can be converted t string and then I can parse it and create elevator events
+			// I am confused as to how to put the data retrieved from the packet to the elevator event list in scheduler
+			 */
+
 			
 			
-			organizeEvents(elevatorEvents);
+			//organizeEvents(elevatorEvents);
 			
-			System.out.println(sequence.toString());
+			//System.out.println(sequence.toString());
 			
-			communicateWithElevator();
-		}
+			//communicateWithElevator();
+
 	}
 	
 	/** 
@@ -81,7 +351,7 @@ public class Scheduler extends Thread{
 	 * is not in the same way as the current event, if not then send the current event. 
 	 * Then send remaining collected events.
 	 * 
-	 * @param array list of elevator events taken from floorBox
+	 *
 	 */
 	public void /*ArrayList<ElevatorEvent>*/ organizeEvents(ArrayList<ElevatorEvent> events) {
 		ElevatorEvent previousEvent = elevatorEvents.get(0);
@@ -133,7 +403,6 @@ public class Scheduler extends Thread{
 	
 	/**
 	 * Takes a string from the set instruction list and sends it to the Elevator 
-	 * @param  Takes in a string of one of the preset instructions
 	 */
 	public void sendInstruction(String message) {
 		
@@ -143,7 +412,7 @@ public class Scheduler extends Thread{
 	/**
 	 * communicateWithElevator() uses the sequence list gathered by organizeEvents and uses that list to 
 	 * communicate with the elevator using sendInstruction() to determine what the elevators next instruction will be
-	 * @param void
+	 *
 	 */
 	public void communicateWithElevator() {
 
@@ -296,5 +565,12 @@ public class Scheduler extends Thread{
 			return completedRequest;
 		}
 		return null;
+	}
+
+	public static void main(String[] args) {
+		Scheduler scheduler = new Scheduler();
+		while(true) {
+			scheduler.start();
+		}
 	}
 }

@@ -13,10 +13,10 @@ public class ArrivalSensor {
 	}
 	
 	// that determines elevator's next floor based on movement direction and sends said floor number to elevator schedule
-	/*
+
 	public int checkNextFloor() {
 		String elevatorState = elevator.getCurrentState();
-		if(elevatorState.equals("UP")) {
+		if(elevatorState.equals("Up")) {
 			floorNumber++;
 			Main.safePrint("Elevator Arriving at Floor " + floorNumber);
 			
@@ -27,7 +27,7 @@ public class ArrivalSensor {
 			//elevator.getMessenger().setFloor(Integer.toString(floorNumber));
 			
 		}
-		else if(elevatorState.equals("DOWN")) {
+		else if(elevatorState.equals("Down")) {
 			floorNumber--;
 			Main.safePrint("Elevator Arriving at Floor " + floorNumber);
 			
@@ -39,9 +39,16 @@ public class ArrivalSensor {
 		}
 		
 		return floorNumber;
-	} */
+	}
 	
 	public void notifyScheduler() {
-		elevator.getMessenger().setFloor(Integer.toString(floorNumber));
+
+		if (elevator.getCurrentState().equals("Up")) {
+			elevator.getElevatorCommunication().sendRequest(this.elevator.getElevatorNumber(),1, this.floorNumber );
+		}
+		else if(elevator.getCurrentState().equals("Down")){
+			elevator.getElevatorCommunication().sendRequest(this.elevator.getElevatorNumber(),0, this.floorNumber );
+
+		}
 	}
 }

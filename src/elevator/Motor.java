@@ -10,10 +10,16 @@ public class Motor {
 	}
 	
 	// set the motor to start moving the elevator display a message including the direction.
-	public void move(String direction) {
-		if(moving == false) {
-			System.out.println("Elevator Moving " + direction);
-			this.moving = true;
+	public void move(int direction) {
+		if(!moving) {
+			if(direction == 1) {
+				System.out.println("Elevator Moving Up");
+				this.moving = true;
+			}
+			else if(direction == 0){
+				System.out.println("Elevator Moving Down");
+				this.moving = true;
+			}
 		}
 	}
 	
