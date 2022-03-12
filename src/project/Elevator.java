@@ -1,5 +1,9 @@
 package project;
 
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.*;
 
 import data.*;
@@ -14,7 +18,8 @@ import elevator.*;
  * @author Sam Al Zoubi
  */
 public class Elevator extends Thread {
-	
+
+
 	enum State{
 		IDLE,
 		UP,
@@ -29,26 +34,44 @@ public class Elevator extends Thread {
 	private int currentFloor;
 	private int numfloors = 10;
 	private State currentState;
+
+
+	private ArrayList<Integer> serviceQueue; // floors that will be serviced in organized order
+	private boolean requestWaiting;
+	private int elevatorNumber;
+	private int port;
+	private ElevatorCommunication elevatorCommunication;
 	
 	// Subsystem variables
 	private ArrivalSensor sensor;
 	private ArrayList<ElevatorButton> buttons;
 	private ArrayList<ElevatorLamp> lamps;
-	private ArrayList<ArrivalSensor> sensors;
+	private ArrivalSensor sensors;
 	private ElevatorDoor door;
 	private Motor motor;
 
 	/**
 	 * Constructor for Elevator
 	 * 
-	 * @param schedulerBox The communication channel to scheduler
+	 *
 	 */
-	public Elevator(Message messenger, Scheduler scheduler) {
+	public Elevator(int elevatorNumber, int port, ElevatorCommunication elevatorCommunication) {
+
+		this.port = port;
+		this.elevatorNumber = elevatorNumber;
+		this.elevatorCommunication = elevatorCommunication;
+
+		this.serviceQueue = new ArrayList<Integer>();
+
+
+
 		this.messenger = messenger;
 		this.scheduler = scheduler;
 		
 		this.currentState = State.IDLE;
 		this.currentFloor = 0;
+
+		this.requestWaiting = false;
 		
 		this.sensor = new ArrivalSensor(0,this);
 		this.door = new ElevatorDoor();
@@ -56,7 +79,7 @@ public class Elevator extends Thread {
 	
 		this.buttons = new ArrayList<>();
 		this.lamps = new ArrayList<>();
-		this.sensors = new ArrayList<>();
+		this.sensors = new ArrivalSensor(0, this);
 		
 		// populate the lists with 10 elements each
 		for(int i=0;i<numfloors;i++) {
@@ -64,12 +87,28 @@ public class Elevator extends Thread {
 			this.lamps.add(newLamp);
 			ElevatorButton newButton = new ElevatorButton(i,newLamp);
 			this.buttons.add(newButton);
-			ArrivalSensor newSensor = new ArrivalSensor(i, this);
-			this.sensors.add(newSensor);
+			//ArrivalSensor newSensor = new ArrivalSensor(i, this);
+			//this.sensors.add(newSensor);
 		}
 
 	}
-	
+
+
+	void addRequest(int direction){
+		synchronized (this){
+			this.serviceQueue.add(direction);
+			notifyAll();
+		}
+	}
+
+	public ElevatorCommunication getElevatorCommunication() {
+		return elevatorCommunication;
+	}
+
+	public int getElevatorNumber() {
+		return elevatorNumber;
+	}
+
 	/**
 	 * Method will run infinitely until program termination
 	 * Method will repeatedly check for a message from the scheduler in the "messenger", will respond and perform actions according to the message from scheduler ONLY IF
@@ -78,89 +117,113 @@ public class Elevator extends Thread {
 	 */
 	public void run() {
 		while(true) {
-			
-			
+
+
 			//**********************************************
 			// 			GET MESSAGE FROM SCHEDULER
 			//**********************************************
-			
-			String message = messenger.getMessage();
-			System.out.println(this.getCurrentState());
-			System.out.println(message);
-			switch (message) {
-				// Can only move up when currently not moving	
-				case "UP":
-					//if(currentState == State.IDLE || currentState == State.UP) {
+
+			synchronized (this) {
+				while(requestWaiting || this.serviceQueue.isEmpty() )
+				{
+					try {
+						wait();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+
+
+
+				//String message = messenger.getMessage();
+				//System.out.println(this.getCurrentState());
+				//System.out.println(message);
+
+				int direction = this.serviceQueue.get(0);
+				switch (direction) {
+
+
+					case 1: // 1 means we want the elevator to go up
+
+						//if(currentState == State.IDLE || currentState == State.UP) {
 						currentState = State.UP;
-						motor.move(message);
+						motor.move(1);
 						//get new currentFloor by contacting ArrivalSensor
-							//ArrivalSensor sends message to scheduler with new floor
+						//ArrivalSensor sends message to scheduler with new floor
 						move();
-					//}
-					break;
-					
-				// Can only move down when currently not moving	
-				case "DOWN":
-					//if(currentState == State.IDLE || currentState == State.DOWN) {
+						//}
+						break;
+
+
+					case 0:  // 0 means we want the elevator to go down
+
+						//if(currentState == State.IDLE || currentState == State.DOWN) {
 						currentState = State.DOWN;
-						motor.move(message);
+						motor.move(0);
 						//get new currentFloor by contacting ArrivalSensor
-							//ArrivalSensor sends message to scheduler with new floor
+						//ArrivalSensor sends message to scheduler with new floor
 						move();
-					//}
-					break;
-					
-				// Can only stop moving if it is currently moving
-				case "STOP":
-					//if(currentState == State.UP || currentState == State.DOWN) {
+						//}
+						break;
+
+
+						// I dont know about the states below
+
+
+						/**
+
+					// Can only stop moving if it is currently moving
+					case "STOP":
+						//if(currentState == State.UP || currentState == State.DOWN) {
 						currentState = State.IDLE;
 						motor.stop(currentFloor);
-					//}
-					break;
-					
-				// Can only open doors if not moving (ElevatorDoor class will ignore this if the door is already open)	
-				case "OPENDOORS":
-					//if(currentState == State.IDLE) {
+						//}
+						break;
+
+					// Can only open doors if not moving (ElevatorDoor class will ignore this if the door is already open)
+					case "OPENDOORS":
+						//if(currentState == State.IDLE) {
 						currentState = State.DOORSOPENING;
 						door.openDoors();
 						currentState = State.IDLE;
-					//}
-					break;
-				// Can only close doors if not moving (ElevatorDoor class will ignore this if the door is already closed)		
-				case "CLOSEDOORS":
-					//if(currentState == State.IDLE) {
+						//}
+						break;
+					// Can only close doors if not moving (ElevatorDoor class will ignore this if the door is already closed)
+					case "CLOSEDOORS":
+						//if(currentState == State.IDLE) {
 						currentState = State.DOORSCLOSING;
 						door.closeDoors();
 						currentState = State.IDLE;
-					//}
-					break;
-				
-				// valid for all states, will however only have action when elevator is moving 
-				case "CONTINUE":
-					//if(currentState == State.UP || currentState == State.DOWN) {
+						//}
+						break;
+
+					// valid for all states, will however only have action when elevator is moving
+					case "CONTINUE":
+						//if(currentState == State.UP || currentState == State.DOWN) {
 						move();
-					//}
-					break;
+						//}
+						break;
+						 */
+				}
 			}
 		}
 	}
+
+
+
 	
 	/**
 	 * Method moves the elevator either up or down to the desired floor
-	 * 
-	 * @param currentFloor - int representing the floor the elevator is currently one
-	 * @param d - Direction the elevator must move to reach desired floor
-	 * @param desiredFloor - int representing the desired floor that has been requested to go to
 	 */
 
 	private void move() {
 		if(currentState == State.UP) {
 			this.currentFloor++;
-			sensors.get(currentFloor).notifyScheduler();
+			sensors.notifyScheduler();
 		}
 		else if(currentState == State.DOWN) {
 			this.currentFloor--;
-			sensors.get(currentFloor).notifyScheduler();
+			sensors.notifyScheduler();
 		}
 	}
 	
