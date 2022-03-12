@@ -1,6 +1,9 @@
 package elevator;
 import java.util.concurrent.TimeUnit;
 
+import data.SysInfo;
+import project.Main;
+
 // @author Tom P
 public class ElevatorDoor {
 	enum State{
@@ -9,56 +12,46 @@ public class ElevatorDoor {
 	}
 	
 	private State currentDoorState;
+	private int number;
 	
-	public ElevatorDoor() {
+	public ElevatorDoor(int number) {
 		this.currentDoorState = State.CLOSED;
+		this.number = number;
 	}
 	
-	public String checkDoorState() {
-		return currentDoorState.toString();
-	}
-	
-	// Function will close the elevator doors and display a message
-	// Will only execute if the doors are not already closed
-	public void closeDoors() {
+	// Function will close the elevator doors
+	public void close() {
 		if(currentDoorState == State.OPEN) {
-			System.out.println("Closing Elevator Doors.....");
-			
-			// Simulate elevator doors closing over the span of 3 seconds
-			
+			clog(number+1, "Doors Closing");
 			try {
-				TimeUnit.SECONDS.sleep(3);
+				Thread.sleep(500);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				System.exit(0);
 			}
-			
-			System.out.println("Doors Closed.");
-			
 			currentDoorState = State.CLOSED;
+			clog(number+1, "Doors Closed");
 		}
 	}
 	
-	// Function will close the elevator doors and display a message
-	// Will only execute if the doors are not already closed
-	public void openDoors() {
+	// Function will close the elevator doors
+	public void open() {
 		if(currentDoorState == State.CLOSED) {
-			System.out.println("Opening Elevator Doors.....");
-			
-			// Simulate elevator doors opening over the span of 3 seconds
-			
+			clog(number+1, "Doors Opening");
 			try {
-				TimeUnit.SECONDS.sleep(3);
+				Thread.sleep(500);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				System.exit(0);
 			}
-			
-			System.out.println("Doors Open.");
-			
 			currentDoorState = State.OPEN;
+			clog(number+1, "Doors Open");
+		}
+	}
+	
+	private void clog(int i, String str) {
+		if(SysInfo.verbose) {
+			Main.clog(i, str);
 		}
 	}
 }

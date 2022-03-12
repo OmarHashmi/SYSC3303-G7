@@ -7,37 +7,46 @@ import data.*;
  * @author Thomas
  */
 public class Main {
-    
-	public static void main(String[] args) {
-
-
-
+    public static void main(String[] args) {
 		Scheduler scheduler = new Scheduler();
 		Floor floor = new Floor();
-		ElevatorCommunication elevatorCommunication = new ElevatorCommunication();
-
-
-
-
+		Elevator elevators[] = new Elevator[SysInfo.numElevators];
+		
 		Thread schedulerThread = scheduler;
-		Thread elevatorCommunicationThread = elevatorCommunication;
         Thread floorThread = floor;
-
+        Thread elevatorThreads[] = new Thread[SysInfo.numElevators]; 
 
         floorThread.start();
         schedulerThread.start();
-		elevatorCommunication.start();
-
+		
+		for(int i=0;i<SysInfo.numElevators;i++) {
+	        elevators[i] = new Elevator(i);
+	        elevatorThreads[i] = elevators[i];
+	        elevatorThreads[i].start();
+		}
+		
+		if(SysInfo.gui) {
+			clog(0,"Communication Logs\n--------------------------------------------\n\n");
+			clog(1,"Elevator 0 Logs\n--------------------------------------------\n\n");
+			Main.clog(1, "At floor 0");
+			clog(2,"Elevator 1 Logs\n--------------------------------------------\n\n");
+			Main.clog(2, "At floor 0");
+			clog(3,"Elevator 2 Logs\n--------------------------------------------\n\n");
+			Main.clog(3, "At floor 0");
+			clog(4,"Elevator 3 Logs\n--------------------------------------------\n\n");
+			Main.clog(4, "At floor 0");
+		}
 	}
 	
-	/**
-	 * A thread safe function for printing to the console
-	 * 
-	 * @param str The string to be printed
-	 */
-	public static void safePrint(String str) {
-		synchronized (System.out) {
-			System.out.println(str);
+	public static void print(String str) {
+		System.out.println(str);
+	}
+	public static Consoles  c = new Consoles();
+	public static void clog(int i, String str) {
+		if(!SysInfo.gui) {
+			Main.print(str);
+			return;
 		}
+		c.log(i, str);
 	}
 }

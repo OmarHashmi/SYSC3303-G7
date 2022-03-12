@@ -1,4 +1,5 @@
 package elevator;
+import data.EState;
 import project.*;
 
 //@author Tom P
@@ -15,40 +16,24 @@ public class ArrivalSensor {
 	// that determines elevator's next floor based on movement direction and sends said floor number to elevator schedule
 
 	public int checkNextFloor() {
-		String elevatorState = elevator.getCurrentState();
-		if(elevatorState.equals("Up")) {
+		EState elevatorState = elevator.getCurrentState();
+		
+		if(elevatorState == EState.UP) {
 			floorNumber++;
-			Main.safePrint("Elevator Arriving at Floor " + floorNumber);
-			
-			//*******************************************
-			//		SEND FLOOR NUMBER TO SCHEDULER
-			//*******************************************
-			
-			//elevator.getMessenger().setFloor(Integer.toString(floorNumber));
-			
 		}
-		else if(elevatorState.equals("Down")) {
+		else if(elevatorState == EState.DOWN) {
 			floorNumber--;
-			Main.safePrint("Elevator Arriving at Floor " + floorNumber);
-			
-			//*******************************************
-			//		SEND FLOOR NUMBER TO SCHEDULER
-			//*******************************************
-			
-			//elevator.getMessenger().setFloor(Integer.toString(floorNumber));
 		}
 		
 		return floorNumber;
 	}
 	
 	public void notifyScheduler() {
-
-		if (elevator.getCurrentState().equals("Up")) {
-			elevator.getElevatorCommunication().sendRequest(this.elevator.getElevatorNumber(),1, this.floorNumber );
+		if (elevator.getCurrentState() == EState.UP) {
+			elevator.sendToScheduler(1, elevator.getFloor() );
 		}
-		else if(elevator.getCurrentState().equals("Down")){
-			elevator.getElevatorCommunication().sendRequest(this.elevator.getElevatorNumber(),0, this.floorNumber );
-
+		else if(elevator.getCurrentState() == EState.DOWN){
+			elevator.sendToScheduler(0, elevator.getFloor() );
 		}
 	}
 }
