@@ -20,7 +20,6 @@ import java.util.*;
 public class Floor extends Thread{
 	private DatagramSocket sendReceiveSocket, receiveSocket;
 
-	private ArrayList<ElevatorEvent> elevatorEvents = new ArrayList<ElevatorEvent>();
 	private ArrayList<Byte> elevatorSend;
 	static List<String> allLines;
 	
@@ -51,7 +50,7 @@ public class Floor extends Thread{
 	 * 
 	 * @param path
 	 */
-	public void readFile(String path) {
+	public boolean readFile(String path) {
 		Path path2 = Paths.get(path);
 		try {
 			File file = new File(path);
@@ -80,10 +79,12 @@ public class Floor extends Thread{
 		}
 		catch (Exception e) {
 			e.printStackTrace();
+			return false;
 		}
+		return true;
 	}
 
-	private void sendInstruction(int dir, int startFloor, int endFloor) {
+	public boolean sendInstruction(int dir, int startFloor, int endFloor) {
 		byte msg[] = new byte[3];
 		msg[0] = (byte) dir;
 		msg[1] = (byte) startFloor;
@@ -96,10 +97,8 @@ public class Floor extends Thread{
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
+			return false;
 		}
-	}
-	
-	public ArrayList<ElevatorEvent> getElevatorEvents(){
-		return elevatorEvents;
+		return true;
 	}
 }
