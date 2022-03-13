@@ -1,10 +1,5 @@
 package data;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import project.Main;
-
 /**
  * A data type which contains all information about an elevator event
  * 

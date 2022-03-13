@@ -14,4 +14,18 @@ public class ElevatorButton {
 	public void press() {
 		this.lamp.turnOn();
 	}
+
+	/**
+	 * @return the floorNum
+	 */
+	public int getFloorNum() {
+		return floorNum;
+	}
+
+	/**
+	 * @param floorNum the floorNum to set
+	 */
+	public void setFloorNum(int floorNum) {
+		this.floorNum = floorNum;
+	}
 }

@@ -1,5 +1,4 @@
 package elevator;
-import java.util.concurrent.TimeUnit;
 
 import data.SysInfo;
 import project.Main;

@@ -69,7 +69,7 @@ public class Floor extends Thread{
 				this.sendInstruction(dir, startFloor, endFloor);
 				
 				try {
-					Thread.sleep(250);
+					Thread.sleep(SysInfo.floorSpeed);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 					System.exit(1);

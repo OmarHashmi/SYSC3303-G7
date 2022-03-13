@@ -20,13 +20,13 @@ public class Consoles {
 		panel.setLayout(new FlowLayout());
 		
 		for(int i=0;i<SysInfo.numElevators+1;i++) {
-			texts[i] = new JTextArea(42,22);
+			texts[i] = new JTextArea(30,18);
 			scrolls[i] = new JScrollPane(texts[i]);
 			panel.add(scrolls[i]);
 		}
 		
 		frame.setContentPane(panel);
-		frame.setSize(1280, 720);
+		frame.setSize(1050, 550);
 		frame.setLocationByPlatform(true);
 		frame.setVisible(true);
 	}
