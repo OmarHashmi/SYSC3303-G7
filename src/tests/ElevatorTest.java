@@ -5,9 +5,6 @@ import data.*;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
-import data.Box;
-import data.Message;
-
 
 public class ElevatorTest {
 
@@ -17,18 +14,22 @@ public class ElevatorTest {
 	 * @author Omar Hashmi
 	 */
 	@Test
-	public void testMove() {
-		Box floorScheduler = new Box();
-		Message messenger = new Message();
-		Scheduler scheduler = new Scheduler(floorScheduler, messenger);
-
-		Elevator elevator = new Elevator(messenger, scheduler);
+	public void testReceive() {
+		int elevatorNumber = 1;
+		String file = "resources/elevator_events.txt";
+		Floor floor = new Floor();
+		Scheduler scheduler = new Scheduler();		
+		Elevator elevator = new Elevator(elevatorNumber);
 		
+		assertTrue(floor.readFile(file));		
+				
+		assertTrue(scheduler.receive());
+			
+		assertTrue(elevator.getCurrentState() == EState.IDLE);
 		
-		assertTrue(elevator.getCurrentState().equals("IDLE"));
-		assertTrue(elevator.getFloor()==0);
+		assertTrue(elevator.getFloor( )== 0);
 		
-		elevator.move(0,1,3);
+		assertTrue(elevator.receive());	
 	}
 
 }

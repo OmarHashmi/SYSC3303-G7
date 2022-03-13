@@ -40,11 +40,11 @@ public class Scheduler extends Thread{
 			receiveSocket = new DatagramSocket(SysInfo.schedulerPort);
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.exit(1);
-		}
+			System.exit(1);		
+		}		
 	}
 
-	public void receive(){
+	public boolean receive(){
 		byte data[] = new byte[3];
 		DatagramPacket receivePacket = new DatagramPacket(data, data.length);
 		
@@ -57,6 +57,7 @@ public class Scheduler extends Thread{
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
+			return false;
 		}
 
 		// From Floor
@@ -79,6 +80,7 @@ public class Scheduler extends Thread{
 
 			sendToFloor(elevatorNumber, dir, floorNumber);
 		}
+		return true;
 	}
 	
 	private void sendToElevator(int elevator, int floor) {

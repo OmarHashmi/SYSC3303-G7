@@ -80,7 +80,7 @@ public class Elevator extends Thread {
 		}
 	}
 
-	public void receive(){
+	public boolean receive(){
 		byte data[] = new byte[1];
 		DatagramPacket receivePacket = new DatagramPacket(data, data.length);
 		
@@ -93,14 +93,16 @@ public class Elevator extends Thread {
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
+			return false;
 		}
 		
 		int startFloor = data[0];
 		
 		move(startFloor);
+		return true;
 	}
 	
-	public void sendToScheduler(int dir, int floor) {
+	public boolean sendToScheduler(int dir, int floor) {
 		byte[] data = new byte[3];
 		data[0] = (byte) dir;
 		data[1] = (byte) this.elevatorNumber;
@@ -121,7 +123,9 @@ public class Elevator extends Thread {
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
+			return false;
 		}
+		return true;
 	}
 
 	private void move(int floor) {
