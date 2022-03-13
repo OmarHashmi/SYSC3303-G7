@@ -1,0 +1,11 @@
+Messages within this system currently consist of 3 bytes, which represent Direction, starting floor, and end floor in that order
+
+Direction: 1 = up
+	   0 = down
+startingfloor:
+	Floor that the user sent the request from.
+endfloor:
+	Floor that the user wishes to go to
+
+All classes send eachother packets with this format, as to show that all classes recieve the same data when passed along.
+
