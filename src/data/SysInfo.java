@@ -6,6 +6,9 @@ public class SysInfo {
 	
 	public static final int numElevators = 4;
 	public static final int numFloors = 10;
+
+	public static final int elevatorSpeed = 1000;
+	public static final int floorSpeed = 250;
 	
 	public static final String   schedulerAddr = "127.0.0.1";
 	public static final String   floorAddr     = "127.0.0.1";

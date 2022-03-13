@@ -143,7 +143,7 @@ public class Elevator extends Thread {
 		}
 		
 		try {
-			sleep(1000);
+			sleep(SysInfo.elevatorSpeed);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

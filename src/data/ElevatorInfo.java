@@ -59,7 +59,7 @@ public class ElevatorInfo {
 			if(events.get(i).getStartFloor() == floor) {
 				Main.print("     Elevator "+number+" Arrived at "+floor);
 				door.open();
-				Main.clog(number+1,"Picked Up from "+events.get(i).getStartFloor()+" to "+floor);
+				Main.clog(number+1,"Picked Up from "+events.get(i).getStartFloor());
 				door.close();
 			}
 			if(events.get(i).getEndFloor() == floor) {

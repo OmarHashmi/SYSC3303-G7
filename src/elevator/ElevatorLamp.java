@@ -3,11 +3,11 @@ package elevator;
 //@author Tom P
 public class ElevatorLamp {
 	private boolean lit;
-	private int floornumber;
+	private int floorNum;
 	
 	public ElevatorLamp(int floorNum) {
 		this.lit = false;
-		this.floornumber = floorNum;
+		this.floorNum = floorNum;
 	}
 	
 	// if light is already on ignore
@@ -22,5 +22,19 @@ public class ElevatorLamp {
 		if(lit != false) {
 			lit = false;
 		}
+	}
+
+	/**
+	 * @return the floornumber
+	 */
+	public int getFloornumber() {
+		return floorNum;
+	}
+
+	/**
+	 * @param floornumber the floornumber to set
+	 */
+	public void setFloornumber(int floornumber) {
+		this.floorNum = floornumber;
 	}
 }
