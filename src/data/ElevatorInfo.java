@@ -98,7 +98,11 @@ public class ElevatorInfo {
 	public boolean hasNext() {
 		return !stops.isEmpty();
 	}
-	
+
+	public int getNumber() {
+		return number;
+	}
+
 	public EState getState() {
 		return state;
 	}
