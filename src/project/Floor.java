@@ -65,7 +65,7 @@ public class Floor extends Thread{
 				int startFloor	= Integer.parseInt(data[1]);
 				int endFloor	= Integer.parseInt(data[3]);
 
-				this.sendInstruction(dir, startFloor, endFloor);
+				this.sendInstruction(dir, startFloor, endFloor, 0);
 				
 				try {
 					Thread.sleep(SysInfo.floorSpeed);
@@ -84,11 +84,19 @@ public class Floor extends Thread{
 		return true;
 	}
 
-	public boolean sendInstruction(int dir, int startFloor, int endFloor) {
-		byte msg[] = new byte[3];
+	public boolean sendInstruction(int dir, int startFloor, int endFloor, int fault) {
+		byte msg[] = new byte[4];  // change to byte[4]
 		msg[0] = (byte) dir;
 		msg[1] = (byte) startFloor;
 		msg[2] = (byte) endFloor;
+		msg[3] = (byte) fault;  // no faults initially but will be changed depending on elevator when floor receives a packet
+
+		//1 - hard fault
+
+		//2 - door fault
+
+		//0 - no fault
+
 
 		try {
 			DatagramPacket packet = new DatagramPacket(msg, msg.length,InetAddress.getLocalHost(), SysInfo.schedulerPort);
@@ -100,5 +108,25 @@ public class Floor extends Thread{
 			return false;
 		}
 		return true;
+	}
+
+
+	// For iteration 4
+	public void receiveMessage() {
+		// Now receiving
+		byte data[] = new byte[4];
+
+		DatagramPacket receivePacket = new DatagramPacket(data, data.length);
+		try {
+			// Block until a datagram is received via receiveSocket.
+			receiveSocket.receive(receivePacket);
+		} catch(IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		System.out.print("Received content containing: ");
+		// Form a String from the byte array.
+		String received = new String(data,0,receivePacket.getLength());
+		System.out.println(received);
 	}
 }

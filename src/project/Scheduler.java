@@ -23,6 +23,8 @@ public class Scheduler extends Thread{
 	private ArrayList<ElevatorEvent> newEvents  = new ArrayList<ElevatorEvent>();
 	
 	private ElevatorInfo[] elevators = new ElevatorInfo[SysInfo.numElevators];
+
+	Thread t1, t2, t3, t4; //threads for monitoring elevators
 	
 
 	/**
@@ -33,7 +35,10 @@ public class Scheduler extends Thread{
 	public Scheduler() {
 		for(int i=0;i<SysInfo.numElevators;i++) {
 			elevators[i] = new ElevatorInfo(i,EState.IDLE,0);
+			t1 = new Thread(new FaultTimer(this, elevators[i]));
 		}
+
+
 		
 		try {
 			sendSocket = new DatagramSocket();
@@ -65,6 +70,7 @@ public class Scheduler extends Thread{
 			int dir        = data[0];
 			int startFloor = data[1];
 			int endFloor   = data[2];
+			int fault      = data[3];   // sending fault status
 
 			newEvents.add(new ElevatorEvent(dir,startFloor,endFloor));
 			dispatch();
