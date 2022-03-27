@@ -81,7 +81,7 @@ public class Elevator extends Thread {
 	}
 
 	public boolean receive(){
-		byte data[] = new byte[1];
+		byte data[] = new byte[2];
 		DatagramPacket receivePacket = new DatagramPacket(data, data.length);
 		
 		// Wait for packet
@@ -97,8 +97,9 @@ public class Elevator extends Thread {
 		}
 		
 		int startFloor = data[0];
+		int error = data[1];
 		
-		move(startFloor);
+		move(startFloor, error);
 		return true;
 	}
 	
@@ -128,7 +129,7 @@ public class Elevator extends Thread {
 		return true;
 	}
 
-	private void move(int floor) {
+	private void move(int floor, int error) {
 		if(currentFloor<floor) {
 			currentState=EState.UP;
 		}else {
@@ -146,12 +147,24 @@ public class Elevator extends Thread {
 			Main.clog(elevatorNumber+1, "At floor "+currentFloor);
 		}
 		
-		try {
-			sleep(SysInfo.elevatorSpeed);
-		} catch (Exception e) {
-			e.printStackTrace();
+		if(error == 0) {  //no error
+			try {
+				sleep(SysInfo.elevatorSpeed);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}		
 		}
-		
+		else if(error == 1) {  //Stuck between floors
+			try {
+				sleep(SysInfo.errorTime);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}		
+		}
+		else if(error == 2) {  //Door stuck as open or close 
+			//door stuff
+		}
+
 		if (currentState == EState.UP) {
 			sendToScheduler(1, currentFloor);
 		}

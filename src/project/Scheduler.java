@@ -50,7 +50,7 @@ public class Scheduler extends Thread{
 	}
 
 	public boolean receive(){
-		byte data[] = new byte[3];
+		byte data[] = new byte[4];
 		DatagramPacket receivePacket = new DatagramPacket(data, data.length);
 		
 		// Wait for packet
@@ -92,8 +92,9 @@ public class Scheduler extends Thread{
 	private void sendToElevator(int elevator, int floor) {
 		int destPort = SysInfo.elevatorPorts[elevator];
 		
-		byte[] data = new byte[1];
+		byte[] data = new byte[2];
 		data[0] = (byte) floor;
+		data[1] = (byte) 1;		//sets the elevator to use errorTime
 		
 		InetAddress addr = null;
 		try {
