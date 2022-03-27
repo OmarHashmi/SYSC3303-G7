@@ -46,28 +46,44 @@ public class ElevatorInfo {
 		stops.addAll(tmp);
 	}
 	
-	public void updateFloor(int floor) {
+	public int updateFloor(int floor) {
 		this.setFloor(floor);
 		
 		if(stops.isEmpty() || floor != stops.get(0)) {
-			return;
+			return 0;
 		}
-		
+		int errorStatus = 0;
 		stops.remove((Object) floor);
 		
 		for(int i=0;i<events.size();i++) {
-			if(events.get(i).getStartFloor() == floor) {
+			ElevatorEvent currentEvent = events.get(i);
+			if(currentEvent.getStartFloor() == floor) {
 				Main.print("     Elevator "+number+" Arrived at "+floor);
+				EState temp = state;
+				state = EState.IDLE;
 				door.open();
 				Main.clog(number+1,"Picked Up from "+events.get(i).getStartFloor());
 				door.close();
+				if(currentEvent.getErrorCode() == 2) {
+					errorStatus = 2;
+					currentEvent.setErrorCode(0);
+				}
+				state = temp;
+				continue;
 			}
-			if(events.get(i).getEndFloor() == floor) {
+			if(currentEvent.getEndFloor() == floor) {
 				Main.print("     Elevator "+number+" Arrived at "+floor);
+				EState temp = state;
+				state = EState.IDLE;
 				door.open();
 				Main.clog(number+1,"Delivered from "+events.get(i).getStartFloor()+" to "+floor);
 				door.close();
+				if(currentEvent.getErrorCode() == 2) {
+					errorStatus = 2;
+					currentEvent.setErrorCode(0);
+				}
 				events.remove(i);
+				state = temp;
 				i--;
 			}
 		}
@@ -77,6 +93,7 @@ public class ElevatorInfo {
 			Main.clog(number+1, "Idle");
 			state = EState.IDLE;
 		}
+		return errorStatus;
 	}
 
 	public boolean onTheWay(int dir, int floor) {
@@ -111,6 +128,9 @@ public class ElevatorInfo {
 	}
 	public int getFloor() {
 		return floor;
+	}
+	public ArrayList<ElevatorEvent> getEvents() {
+		return events;
 	}
 	public void setFloor(int floor) {
 		this.floor = floor;

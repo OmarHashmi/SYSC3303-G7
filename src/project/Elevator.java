@@ -155,16 +155,19 @@ public class Elevator extends Thread {
 			}		
 		}
 		else if(error == 1) {  //Stuck between floors
-			try {
-				sleep(SysInfo.errorTime);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}		
+			
+			currentState = EState.STUCK;
 		}
 		else if(error == 2) {  //Door stuck as open or close 
-			//door stuff
+			Main.clog(elevatorNumber+1,"**DOOR FAULT**");
+			try {
+				sleep(SysInfo.elevatorSpeed + 1000);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			Main.clog(elevatorNumber+1,"**FAULT RESOLVED**");
 		}
-
+		
 		if (currentState == EState.UP) {
 			sendToScheduler(1, currentFloor);
 		}
