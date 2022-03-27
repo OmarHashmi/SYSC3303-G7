@@ -64,8 +64,9 @@ public class Floor extends Thread{
 				int dir			= (data[2].equals("Up"))? 1 : 0;
 				int startFloor	= Integer.parseInt(data[1]);
 				int endFloor	= Integer.parseInt(data[3]);
+				int errorCode = Integer.parseInt(data[4]);
 
-				this.sendInstruction(dir, startFloor, endFloor, 0);
+				this.sendInstruction(dir, startFloor, endFloor, errorCode);
 				
 				try {
 					Thread.sleep(SysInfo.floorSpeed);

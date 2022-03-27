@@ -19,12 +19,10 @@ import java.util.stream.Collectors;
  */
 public class Scheduler extends Thread{
 	private  DatagramSocket sendSocket, receiveSocket;
-
 	private ArrayList<ElevatorEvent> newEvents  = new ArrayList<ElevatorEvent>();
-	
 	private ElevatorInfo[] elevators = new ElevatorInfo[SysInfo.numElevators];
-
-	Thread t1, t2, t3, t4; //threads for monitoring elevators
+	private Thread[] timerThreads = new Thread[SysInfo.numElevators];
+	private FaultTimer[] timers = new FaultTimer[SysInfo.numElevators];
 	
 
 	/**
@@ -33,12 +31,12 @@ public class Scheduler extends Thread{
 	 *
 	 */
 	public Scheduler() {
+		// Create elevatorInfo Objects and their respective timers
 		for(int i=0;i<SysInfo.numElevators;i++) {
 			elevators[i] = new ElevatorInfo(i,EState.IDLE,0);
-			t1 = new Thread(new FaultTimer(this, elevators[i]));
+			timers[i] = new FaultTimer(this, elevators[i]);
+			timerThreads[i] = new Thread(timers[i]);
 		}
-
-
 		
 		try {
 			sendSocket = new DatagramSocket();
@@ -72,7 +70,7 @@ public class Scheduler extends Thread{
 			int endFloor   = data[2];
 			int fault      = data[3];   // sending fault status
 
-			newEvents.add(new ElevatorEvent(dir,startFloor,endFloor));
+			newEvents.add(new ElevatorEvent(dir,startFloor,endFloor,fault));
 			dispatch();
 		}
 		// From Elevator
@@ -89,12 +87,12 @@ public class Scheduler extends Thread{
 		return true;
 	}
 	
-	private void sendToElevator(int elevator, int floor) {
+	private void sendToElevator(int elevator, int floor, int errorCode) {
 		int destPort = SysInfo.elevatorPorts[elevator];
 		
 		byte[] data = new byte[2];
 		data[0] = (byte) floor;
-		data[1] = (byte) 1;		//sets the elevator to use errorTime
+		data[1] = (byte) errorCode;		//sets the elevator to use errorTime
 		
 		InetAddress addr = null;
 		try {
@@ -159,7 +157,12 @@ public class Scheduler extends Thread{
 				Main.print(tmp.getStartFloor()+"->"+tmp.getEndFloor()+" Sending Elevator "+i);
 				
 				tmp = newEvents.remove(0);
-				sendToElevator(i,tmp.getStartFloor());
+				if(tmp.getErrorCode() == 2) {
+					sendToElevator(i,tmp.getStartFloor(), 0);
+				}
+				else {
+					sendToElevator(i,tmp.getStartFloor(), tmp.getErrorCode());
+				}
 				elevators[i].addEvent(tmp);
 				
 				return;
@@ -168,21 +171,25 @@ public class Scheduler extends Thread{
 	}
 	
 	private void dropoff(int i, int floor) {
-		elevators[i].updateFloor(floor);
+		int errorStatus = elevators[i].updateFloor(floor);
 		
 		if(elevators[i].getState()==EState.IDLE) {
 			dispatch();
 		}
 		
 		if(elevators[i].hasNext()) {
-			sendToElevator(i,elevators[i].nextFloor());
+			sendToElevator(i,elevators[i].nextFloor(),errorStatus);
 		}
 	}
 	
 	/**
 	 * Thread loop for Elevator
 	 */
-	public void run(){		
+	public void run(){
+		//start the timers
+		for(Thread timer: timerThreads) {
+			timer.start();
+		}
 		while(true) {
 			this.receive();
 		}

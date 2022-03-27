@@ -20,7 +20,7 @@ public class FloorTest {
 		String file = "resources/elevator_events.txt";
 		
 		assertTrue(floor.readFile(file));
-		assertTrue(floor.sendInstruction(1,2,3));			
+		assertTrue(floor.sendInstruction(1,2,3,0));			
 	}
 
 }

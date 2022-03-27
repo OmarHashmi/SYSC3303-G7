@@ -9,6 +9,7 @@ public class ElevatorEvent {
 	private int dir;
 	private int startFloor;
 	private int endFloor;
+	private int errorCode;
 	
 	/**
 	 * Constructor for ElevatorEvent
@@ -17,10 +18,11 @@ public class ElevatorEvent {
 	 * @param startFloor	The floor the elevator will starting at
 	 * @param endFloor		The floor the elevator needs to go to
 	 */
-	public ElevatorEvent(int dir, int startFloor, int endFloor){
+	public ElevatorEvent(int dir, int startFloor, int endFloor, int errorCode){
 		this.dir        = dir;
 		this.startFloor = startFloor;
 		this.endFloor   = endFloor;
+		this.errorCode = errorCode;
 	}
 	
 	public String toString(){
@@ -55,5 +57,13 @@ public class ElevatorEvent {
 	 */
 	public int getEndFloor() {
 		return endFloor;
+	}
+	
+	public int getErrorCode() {
+		return errorCode;
+	}
+	
+	public void setErrorCode(int newErrorCode) {
+		this.errorCode = newErrorCode;
 	}
 }
