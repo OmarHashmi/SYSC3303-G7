@@ -15,6 +15,7 @@ public class ElevatorTest {
 	 */
 	@Test
 	public void testReceive() {
+		SysInfo.gui = false;
 		int elevatorNumber = 1;
 		String file = "resources/elevator_events.txt";
 		Floor floor = new Floor();

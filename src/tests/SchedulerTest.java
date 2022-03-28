@@ -8,8 +8,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import org.junit.Test;
 
-import data.ElevatorEvent;
-
 
 
 public class SchedulerTest {
@@ -31,6 +29,7 @@ public class SchedulerTest {
 	*/
 	@Test
 	public void testReceive() {
+		SysInfo.gui = false;
 		Scheduler scheduler = new Scheduler();
 		Floor floor = new Floor();
 		/*
