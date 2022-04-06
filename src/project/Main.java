@@ -13,6 +13,18 @@ public class Main {
     	System.out.print("What subsystem is this?\n\t1. Floor\n\t2. Scheduler\n\t3. Elevator\n\t4. All of the above\n\n>");
     	Scanner scanner = new Scanner(System.in);
     	int input = scanner.nextInt();
+    	
+    	scanner.nextLine();
+    	
+    	System.out.print("\nHow long should the elevator take to move between floors? (S)\n\n>");
+    	scanner = new Scanner(System.in);
+    	SysInfo.elevatorSpeed = scanner.nextInt()*1000;
+    		
+    	scanner.nextLine();
+    	
+    	System.out.print("\nHow long should the elevator take to load and unload passengers (S)\n\n>");
+    	scanner = new Scanner(System.in);
+    	SysInfo.doorSpeed = scanner.nextInt()*1000;	
     	scanner.close();
     	
     	if(SysInfo.gui) {

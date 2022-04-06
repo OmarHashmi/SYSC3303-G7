@@ -10,6 +10,8 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.time.Duration;
+import java.time.Instant;
 
 
 /**
@@ -23,6 +25,8 @@ public class Scheduler extends Thread{
 	private ElevatorInfo[] elevators = new ElevatorInfo[SysInfo.numElevators];
 	private Thread[] timerThreads = new Thread[SysInfo.numElevators];
 	private FaultTimer[] timers = new FaultTimer[SysInfo.numElevators];
+	private int elevatorDone = 0;
+	private Instant end;
 	
 
 	/**
@@ -84,6 +88,23 @@ public class Scheduler extends Thread{
 
 			sendToFloor(elevatorNumber, dir, floorNumber);
 		}
+		
+		//checks if each elevator is done
+		for(int x = 0; x < SysInfo.numElevators; x++) {
+			if(elevators[x].getState() == EState.IDLE | elevators[x].getState() == EState.STUCK) {
+				elevatorDone++;
+			}
+		}
+		//if each elevator is done print elapsed time
+		if(elevatorDone == SysInfo.numElevators) {
+			end = Instant.now();
+			Duration timeElapsed = Duration.between(SysInfo.startTime, end);
+			Main.print("\nTime elapsed: " + timeElapsed.toMillis() + "ms");
+		}
+		else {
+			elevatorDone = 0;
+		}
+		
 		return true;
 	}
 	
