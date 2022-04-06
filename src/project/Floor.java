@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.time.Instant;
 
 
 /**
@@ -51,6 +52,7 @@ public class Floor extends Thread{
 	 * @param path
 	 */
 	public boolean readFile(String path) {
+		SysInfo.startTime = Instant.now();				//Grab the time when the program reads the file
 		Path path2 = Paths.get(path);
 		try {
 			File file = new File(path);

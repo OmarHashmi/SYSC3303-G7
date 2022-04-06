@@ -23,7 +23,7 @@ public class ElevatorDoor {
 		if(currentDoorState == State.OPEN) {
 			clog(number+1, "Doors Closing");
 			try {
-				Thread.sleep(500);
+				Thread.sleep(SysInfo.doorSpeed);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 				System.exit(0);
@@ -38,7 +38,7 @@ public class ElevatorDoor {
 		if(currentDoorState == State.CLOSED) {
 			clog(number+1, "Doors Opening");
 			try {
-				Thread.sleep(500);
+				Thread.sleep(SysInfo.doorSpeed);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 				System.exit(0);
