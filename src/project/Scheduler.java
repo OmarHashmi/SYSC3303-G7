@@ -89,13 +89,13 @@ public class Scheduler extends Thread{
 			sendToFloor(elevatorNumber, dir, floorNumber);
 		}
 		
-		
+		//checks if each elevator is done
 		for(int x = 0; x < SysInfo.numElevators; x++) {
 			if(elevators[x].getState() == EState.IDLE | elevators[x].getState() == EState.STUCK) {
 				elevatorDone++;
 			}
 		}
-		
+		//if each elevator is done print elapsed time
 		if(elevatorDone == SysInfo.numElevators) {
 			end = Instant.now();
 			Duration timeElapsed = Duration.between(SysInfo.startTime, end);
