@@ -29,6 +29,7 @@ public class SchedulerTest {
 	*/
 	@Test
 	public void testReceive() {
+		SysInfo.init();
 		SysInfo.gui = false;
 		Scheduler scheduler = new Scheduler();
 		Floor floor = new Floor();

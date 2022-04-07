@@ -13,20 +13,10 @@ public class Main {
     	System.out.print("What subsystem is this?\n\t1. Floor\n\t2. Scheduler\n\t3. Elevator\n\t4. All of the above\n\n>");
     	Scanner scanner = new Scanner(System.in);
     	int input = scanner.nextInt();
-    	
-    	scanner.nextLine();
-    	
-    	System.out.print("\nHow long should the elevator take to move between floors? (S)\n\n>");
-    	scanner = new Scanner(System.in);
-    	SysInfo.elevatorSpeed = scanner.nextInt()*1000;
-    		
-    	scanner.nextLine();
-    	
-    	System.out.print("\nHow long should the elevator take to load and unload passengers (S)\n\n>");
-    	scanner = new Scanner(System.in);
-    	SysInfo.doorSpeed = scanner.nextInt()*1000;	
     	scanner.close();
     	
+    	SysInfo.init();
+    	    	
     	if(SysInfo.gui) {
     		initGUI();
     	}
@@ -48,14 +38,9 @@ public class Main {
     	consoles = new Consoles();
     	
     	clog(0,"Communication Logs\n--------------------------------------------\n\n");
-		clog(1,"Elevator 0 Logs\n--------------------------------------------\n\n");
-		Main.clog(1, "At floor 0");
-		clog(2,"Elevator 1 Logs\n--------------------------------------------\n\n");
-		Main.clog(2, "At floor 0");
-		clog(3,"Elevator 2 Logs\n--------------------------------------------\n\n");
-		Main.clog(3, "At floor 0");
-		clog(4,"Elevator 3 Logs\n--------------------------------------------\n\n");
-		Main.clog(4, "At floor 0");
+    	for(int i=0;i<SysInfo.numElevators;i++) {
+    		clog(i+1,"Elevator "+i+" Logs\n--------------------------------------------\n\n");
+    	}
     }
     private static void initFloor() {
     	Floor floor = new Floor();
