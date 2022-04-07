@@ -29,6 +29,7 @@ public class Elevator extends Thread {
 	private ArrivalSensor sensors;
 	private ElevatorDoor door;
 	private Motor motor;
+	private boolean working = true;
 	
 	private  DatagramSocket sendSocket, receiveSocket;
 
@@ -92,6 +93,7 @@ public class Elevator extends Thread {
 			Main.clog(0, "Elevator "+elevatorNumber+" got \""+tmp+"\"");
 		} catch (IOException e) {
 			e.printStackTrace();
+			this.working = false;
 			System.exit(1);
 			return false;
 		}
@@ -174,6 +176,9 @@ public class Elevator extends Thread {
 		else if(currentState == EState.DOWN){
 			sendToScheduler(0, currentFloor);
 		}
+	}
+	public boolean isWorking() {
+		return this.working;
 	}
 	
 	public int getFloor() {

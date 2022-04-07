@@ -23,7 +23,7 @@ public class FaultTimer extends Thread{
         	preFloor = this.elevator.getFloor();
         	preState = this.elevator.getState();
             try {
-            	Thread.sleep(5000);
+            	Thread.sleep(SysInfo.faultTime);
             } catch (InterruptedException e) {
             	e.printStackTrace();
             }

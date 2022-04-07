@@ -15,6 +15,7 @@ public class ElevatorTest {
 	 */
 	@Test
 	public void testReceive() {
+		SysInfo.init();
 		SysInfo.gui = false;
 		int elevatorNumber = 1;
 		String file = "resources/elevator_events.txt";
@@ -30,7 +31,7 @@ public class ElevatorTest {
 		
 		assertTrue(elevator.getFloor( )== 0);
 		
-		assertTrue(elevator.receive());	
+		assertTrue(elevator.isWorking());	
 	}
 
 }

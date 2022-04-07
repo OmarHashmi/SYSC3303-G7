@@ -16,6 +16,7 @@ public class FloorTest {
 	 * @author Omar Hashmi
 	 */
 	public void testRead(){
+		SysInfo.init();
 		SysInfo.gui = false;
 		Floor floor = new Floor();
 		String file = "resources/elevator_events.txt";
